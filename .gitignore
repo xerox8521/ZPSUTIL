@@ -1,0 +1,10 @@
+#Executables
+*.exe
+*.exe.11
+*.bat
+#Include directories
+include/*
+include1.11
+!*include/zpsutil.inc
+uncertain.txt
+zps_*.txt
