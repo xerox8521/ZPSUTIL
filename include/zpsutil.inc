@@ -59,7 +59,7 @@ forward Action OnPlayerGiveAmmoToPlayer(int client, int receiver);
 // szWeaponName is the classname of the weapon
 forward Action OnPlayerGiveWeaponToPlayer(int client, int receiver, int weapon, const char[] szWeaponName);
 // Return Plugin Handled to prevent the player from picking up the weapon.
-forward Action OnPlayerPickupWeapon(int client, int weapon, const char[] szWeaponName, bool bUnknown, int inventorySlot, bForcePickupSlot);
+forward Action OnPlayerPickupWeapon(int client, int weapon, const char[] szWeaponName, bool bUnknown, int inventorySlot, bool bForcePickupSlot);
 
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
