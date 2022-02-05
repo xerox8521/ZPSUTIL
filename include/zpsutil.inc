@@ -127,6 +127,15 @@ native void SendPhoneMessageLocation(const char[] szMessage, float vecPos[3], bo
 native void SendPhoneMessage(const char[] szMessage, bool bPlaySound = true);
 native void SendPhoneMessageToPlayer(int client, const char[] szMessage);
 
+// Sets the current round time.
+native void SetRoundTime(float flRoundTime);
+native void AddRoundTime(float flTime);
+
+native float GetRoundRemainingTime();
+
+native int GetRandomTeamPlayer(int iTeamIndex, bool bAlive);
+native int GetRandomCarrier(bool bAlive);
+
 
 public SharedPlugin __pl_zpsutil = 
 {
@@ -170,6 +179,17 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("SetPlayerEscaped");
    MarkNativeAsOptional("SetPlayerArmor");
    MarkNativeAsOptional("SetPlayerArmour");
+   MarkNativeAsOptional("GetActiveWeapon");
+   MarkNativeAsOptional("SetEntityMaxHealth");
+   MarkNativeAsOptional("GetEntityMaxHealth");
+   MarkNativeAsOptional("SendPhoneMessageLocation");
+   MarkNativeAsOptional("SendPhoneMessage");
+   MarkNativeAsOptional("SendPhoneMessageToPlayer");
+   MarkNativeAsOptional("SetRoundTime");
+   MarkNativeAsOptional("AddRoundTime");
+   MarkNativeAsOptional("GetRandomTeamPlayer");
+   MarkNativeAsOptional("GetRandomCarrier");
+   MarkNativeAsOptional("GetRoundRemainingTime");
 }
 #endif
 

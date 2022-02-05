@@ -225,8 +225,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("SendPhoneMessageLocation",    Native_SendPhoneMessageLocation);
     CreateNative("SendPhoneMessage",            Native_SendPhoneMessage);
     CreateNative("SendPhoneMessageToPlayer",    Native_SendPhoneMessageToPlayer);
+    CreateNative("SetRoundTime",                Native_SetRoundTime);
+    CreateNative("AddRoundTime",                Native_AddRoundTime);
+    CreateNative("GetRoundRemainingTime",       Native_GetRoundRemainingTime);
+    CreateNative("GetRandomTeamPlayer",         Native_GetRandomTeamPlayer);
+    CreateNative("GetRandomCarrier",            Native_GetRandomCarrier);
 
-    
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
 }
@@ -1152,4 +1156,121 @@ public int Native_SendPhoneMessageToPlayer(Handle plugin, int params)
         SDKCall(hSDKCall, client, szMessage);
     }
     return 1;
+}
+
+public int Native_SetRoundTime(Handle plugin, int params)
+{
+    float flRoundTime = GetNativeCell(1);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::SetRoundTime");
+        PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CZombiePanic::SetRoundTime. Update your game data!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        SDKCall(hSDKCall, flRoundTime);
+    }
+    return 1;
+}
+
+public int Native_AddRoundTime(Handle plugin, int params)
+{
+    float flRoundTime = GetNativeCell(1);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::AddRoundTime");
+        PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CZombiePanic::AddRoundTime. Update your game data!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        SDKCall(hSDKCall, flRoundTime);
+    }
+    return 1;
+}
+
+public any Native_GetRoundRemainingTime(Handle plugin, int params)
+{
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::GetRemainingRoundTime");
+        PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CZombiePanic::GetRemainingRoundTime. Update your game data!");
+            return -1;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall);
+    }
+    return -1;
+}
+
+public int Native_GetRandomTeamPlayer(Handle plugin, int params)
+{
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::GetRandomTeamPlayer");
+        PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+        PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+        PrepSDKCall_SetReturnInfo(SDKType_CBasePlayer, SDKPass_Pointer);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CZombiePanic::GetRandomTeamPlayer. Update your game data!");
+            return INVALID_ENT_REFERENCE;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, GetNativeCell(1), GetNativeCell(2));
+    }
+    return INVALID_ENT_REFERENCE;
+}
+
+public int Native_GetRandomCarrier(Handle plugin, int params)
+{
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::GetRandomCarrier");
+        PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+        PrepSDKCall_SetReturnInfo(SDKType_CBasePlayer, SDKPass_Pointer);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CZombiePanic::GetRandomCarrier. Update your game data!");
+            return INVALID_ENT_REFERENCE;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, GetNativeCell(1));
+    }
+    return INVALID_ENT_REFERENCE;
 }
