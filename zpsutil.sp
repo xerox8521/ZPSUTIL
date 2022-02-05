@@ -1,3 +1,23 @@
+/**
+ * vim: set ts=4 :
+ * =============================================================================
+ * ZPSUTIL 
+ * Copyright (C) 2022 https://github.com/xerox8521/ (xerox8521).  All rights reserved.
+ * =============================================================================
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, version 3.0, as published by the
+ * Free Software Foundation.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 #pragma newdecls required
 #pragma semicolon 1
 #include <sourcemod>
@@ -183,6 +203,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("SetPlayerArmor",          Native_SetArmorValue);
     CreateNative("SetPlayerArmour",         Native_SetArmorValue);
     CreateNative("GetActiveWeapon",         Native_GetActiveWeapon);
+    CreateNative("SetEntityMaxHealth",      Native_SetEntityMaxHealth);
+    CreateNative("GetEntityMaxHealth",      Native_GetEntityMaxHealth);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -966,4 +988,20 @@ public int Native_GetActiveWeapon(Handle plugin, int params)
     if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
 
     return GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+}
+
+public int Native_SetEntityMaxHealth(Handle plugin, int params)
+{
+    int entity = GetNativeCell(1);
+    if(!IsValidEntity(entity)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity inded %d is invalid", entity);
+
+    SetEntProp(entity, Prop_Data, "m_iMaxHealth", GetNativeCell(2));
+    return 1;
+}
+public int Native_GetEntityMaxHealth(Handle plugin, int params)
+{
+    int entity = GetNativeCell(1);
+    if(!IsValidEntity(entity)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity inded %d is invalid", entity);
+
+    return GetEntProp(entity, Prop_Data, "m_iMaxHealth");
 }

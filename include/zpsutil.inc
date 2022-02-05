@@ -1,3 +1,24 @@
+/**
+ * vim: set ts=4 :
+ * =============================================================================
+ * ZPSUTIL 
+ * Copyright (C) 2022 https://github.com/xerox8521/ (xerox8521).  All rights reserved.
+ * =============================================================================
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, version 3.0, as published by the
+ * Free Software Foundation.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 #if defined _zpsutil_included
  #endinput
 #endif
@@ -10,6 +31,13 @@ enum AmmoType
     AMMO_TYPE_SHOTGUN,
     AMMO_TYPE_RIFLE,
     AMMO_TYPE_BARRICADE
+}
+
+enum 
+{
+    TEAM_SPECTATOR = 1,
+    TEAM_SURVIVOR,
+    TEAM_ZOMBIE 
 }
 
 
@@ -76,6 +104,10 @@ native void SetInfection(int client, bool bInfection, bool bForced, int infectio
 native void SetInfectionResistance(int client, int percentage, float time);
 native void CreateCosmeticWear(int client, const char[] szModelName);
 native void RemoveCosmeticWear(int client, const char[] szModelName);
+
+// Also works on players.
+native void SetEntityMaxHealth(int entity, int maxhp);
+native int GetEntityMaxHealth(int entity);
 
 
 public SharedPlugin __pl_zpsutil = 
