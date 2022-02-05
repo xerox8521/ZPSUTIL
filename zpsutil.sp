@@ -1005,3 +1005,4 @@ public int Native_GetEntityMaxHealth(Handle plugin, int params)
 
     return GetEntProp(entity, Prop_Data, "m_iMaxHealth");
 }
+
