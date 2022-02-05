@@ -120,6 +120,5 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("SetPlayerEscaped");
    MarkNativeAsOptional("SetPlayerArmor");
    MarkNativeAsOptional("SetPlayerArmour");
-   MarkNativeAsOptional("LookupEntityAttachment");
 }
 #endif
