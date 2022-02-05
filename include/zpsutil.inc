@@ -123,7 +123,9 @@ forward void OnRoundStart();
 forward void OnRoundEnd(int winner);
 
 
-native void SendPhoneMessageLocation(const char[] szMessage, float vecPos[3], bool bUnknown, bool bPlaySound);
+native void SendPhoneMessageLocation(const char[] szMessage, float vecPos[3], bool bUnknown, bool bPlaySound = true);
+native void SendPhoneMessage(const char[] szMessage, bool bPlaySound = true);
+native void SendPhoneMessageToPlayer(int client, const char[] szMessage);
 
 
 public SharedPlugin __pl_zpsutil = 

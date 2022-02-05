@@ -204,11 +204,33 @@
             * Almost Unique String: tutor_phone_message. Has 2 results.
             * Correct function calls the phone_msg event.
             */
-            "CZombiePanic::SendMessageLocation"
+            "CZombiePanic::SendPhoneMessageLocation"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic16SendPhoneMessageEPKc6Vectorbb"
                 "windows"   "\x55\x8B\xEC\x83\xEC\x10\x56\x57\xFF\x75\x08"
+            }
+            /*
+            * Unique String: "void SendPhoneMessage"
+            * Function above is UTIL_SendPhoneMessage
+            * Which calls CZombiePanic::SendPhoneMessage 
+            */
+            "CZombiePanic::SendPhoneMessage"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic16SendPhoneMessageEPKcb"
+                "windows"   "\x55\x8B\xEC\x83\xEC\x0C\xFF\x75\x0C"
+            }
+            /*
+            * Unique String: "void SendPhoneMessageToPlayer"
+            * Function above is UTIL_SendPhoneMessageToPlayer
+            * Which calls CZombiePanic::SendPhoneMessageToPlayer 
+            */
+            "CZombiePanic::SendPhoneMessageToPlayer"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic16SendPhoneMessageEPKcb"
+                "windows"   "\x55\x8B\xEC\x51\x57\x8B\x7D\x08\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A"
             }
         }
         "Functions"
