@@ -42,6 +42,7 @@ DynamicDetour ddOnGetSpeed = null;
 DynamicDetour ddOnGiveAmmoToPlayer = null;
 DynamicDetour ddOnGiveWeaponToPlayer = null;
 DynamicDetour ddOnPlayerWeaponPickup = null;
+DynamicDetour ddOnRoundStart = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
@@ -49,6 +50,9 @@ GlobalForward gfGetSpeed = null;
 GlobalForward gfGiveAmmoToPlayer = null;
 GlobalForward gfGiveWeaponToPlayer = null;
 GlobalForward gfPlayerWeaponPickup = null;
+GlobalForward gfRoundStart = null;
+GlobalForward gfRoundEnd = null;
+
 
 ConVar sm_zps_util_colored_tags = null;
 ConVar sm_zps_afk_admin_immunity = null;
@@ -144,6 +148,16 @@ public void OnPluginStart()
         return;
     }
     ddOnPlayerWeaponPickup.Enable(Hook_Post, Hook_OnPlayerWeaponPickup);
+    
+    ddOnRoundStart = DynamicDetour.FromConf(g_pGameConfig, "OnRoundStart");
+    if(ddOnRoundStart == null)
+    {
+        SetFailState("Failed to setup OnRoundStart detour. Update your Gamedata!");
+        return;
+    }
+    ddOnRoundStart.Enable(Hook_Post, Hook_OnRoundStart);
+
+    HookEvent("endslate", Event_RoundEnd);
 
 
 
@@ -175,36 +189,40 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     gfGiveWeaponToPlayer = CreateGlobalForward("OnPlayerGiveWeaponToPlayer", ET_Event, Param_Cell, Param_Cell, Param_Cell, Param_String);
     gfPlayerWeaponPickup = CreateGlobalForward("OnPlayerPickupWeapon", ET_Event, Param_Cell, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell);
 
-    CreateNative("IsCarrier",               Native_IsCarrier);
-    CreateNative("IsInfected",              Native_IsInfected);
-    CreateNative("IsInPhoneTrigger",        Native_IsInPhoneTrigger);
-    CreateNative("IsRoaring",               Native_IsRoaring);
-    CreateNative("IsBerzerking",            Native_IsBerzerking);
-    CreateNative("ToggleWeaponSwitch",      Native_ToggleWeaponSwitch);
-    CreateNative("IsWeaponSwitchAllowed",   Native_IsWeaponSwitchAllowed);
-    CreateNative("SetInfection",            Native_SetInfection);
-    CreateNative("SetInfectionResistance",  Native_SetInfectionResistance);
-    CreateNative("GetPlayerWeight",         Native_GetPlayerWeight);
-    CreateNative("AddPlayerWeight",         Native_AddPlayerWeight);
-    CreateNative("RemovePlayerWeight",      Native_RemovePlayerWeight);
-    CreateNative("PlayerDropWeapon",        Native_PlayerDropWeapon);
-    CreateNative("IsCustom",                Native_IsCustom);
-    CreateNative("CreateCosmeticWear",      Native_CreateCosmeticWear);
-    CreateNative("RemoveCosmeticWear",      Native_RemoveCosmeticWear);
-    CreateNative("RespawnPlayer",           Native_RespawnPlayer);
-    CreateNative("GivePlayerWeapon",        Native_GivePlayerWeapon);
-    CreateNative("OpenSteamOverlay",        Native_OpenSteamOverlay);
-    CreateNative("GetRemainingInvSlots",    Native_GetRemainingInventorySlots);
-    CreateNative("PlayerHasAmmoType",       Native_HasAmmoType);
-    CreateNative("PlayerHasActiveIED",      Native_HasActiveIED);
-    CreateNative("PlayerHasDeliveryItem",   Native_HasDeliveryItem);
-    CreateNative("SetArmModel",             Native_SetArmModel);
-    CreateNative("SetPlayerEscaped",        Native_SetEscaped);
-    CreateNative("SetPlayerArmor",          Native_SetArmorValue);
-    CreateNative("SetPlayerArmour",         Native_SetArmorValue);
-    CreateNative("GetActiveWeapon",         Native_GetActiveWeapon);
-    CreateNative("SetEntityMaxHealth",      Native_SetEntityMaxHealth);
-    CreateNative("GetEntityMaxHealth",      Native_GetEntityMaxHealth);
+    gfRoundStart = CreateGlobalForward("OnRoundStart", ET_Ignore);
+    gfRoundEnd = CreateGlobalForward("OnRoundEnd", ET_Ignore, Param_Cell);
+
+    CreateNative("IsCarrier",                   Native_IsCarrier);
+    CreateNative("IsInfected",                  Native_IsInfected);
+    CreateNative("IsInPhoneTrigger",            Native_IsInPhoneTrigger);
+    CreateNative("IsRoaring",                   Native_IsRoaring);
+    CreateNative("IsBerzerking",                Native_IsBerzerking);
+    CreateNative("ToggleWeaponSwitch",          Native_ToggleWeaponSwitch);
+    CreateNative("IsWeaponSwitchAllowed",       Native_IsWeaponSwitchAllowed);
+    CreateNative("SetInfection",                Native_SetInfection);
+    CreateNative("SetInfectionResistance",      Native_SetInfectionResistance);
+    CreateNative("GetPlayerWeight",             Native_GetPlayerWeight);
+    CreateNative("AddPlayerWeight",             Native_AddPlayerWeight);
+    CreateNative("RemovePlayerWeight",          Native_RemovePlayerWeight);
+    CreateNative("PlayerDropWeapon",            Native_PlayerDropWeapon);
+    CreateNative("IsCustom",                    Native_IsCustom);
+    CreateNative("CreateCosmeticWear",          Native_CreateCosmeticWear);
+    CreateNative("RemoveCosmeticWear",          Native_RemoveCosmeticWear);
+    CreateNative("RespawnPlayer",               Native_RespawnPlayer);
+    CreateNative("GivePlayerWeapon",            Native_GivePlayerWeapon);
+    CreateNative("OpenSteamOverlay",            Native_OpenSteamOverlay);
+    CreateNative("GetRemainingInvSlots",        Native_GetRemainingInventorySlots);
+    CreateNative("PlayerHasAmmoType",           Native_HasAmmoType);
+    CreateNative("PlayerHasActiveIED",          Native_HasActiveIED);
+    CreateNative("PlayerHasDeliveryItem",       Native_HasDeliveryItem);
+    CreateNative("SetArmModel",                 Native_SetArmModel);
+    CreateNative("SetPlayerEscaped",            Native_SetEscaped);
+    CreateNative("SetPlayerArmor",              Native_SetArmorValue);
+    CreateNative("SetPlayerArmour",             Native_SetArmorValue);
+    CreateNative("GetActiveWeapon",             Native_GetActiveWeapon);
+    CreateNative("SetEntityMaxHealth",          Native_SetEntityMaxHealth);
+    CreateNative("GetEntityMaxHealth",          Native_GetEntityMaxHealth);
+    CreateNative("SendPhoneMessageLocation",    Native_SendPhoneMessageLocation);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -255,7 +273,37 @@ public Action t_ResetModifiedChat(Handle timer, any serial)
     return Plugin_Continue;
 }
 
+public void Event_RoundEnd(Event event, const char[] szName, bool dontBroadcast)
+{
+    char win_text[32];
+    event.GetString("win_text", win_text, sizeof(win_text));
 
+    int winner = 0;
+    if(StrEqual(win_text, "human"))
+    {
+        winner = 1;
+    }
+    else if(StrEqual(win_text, "zombie"))
+    {
+        winner = 2;
+    }
+    else if(StrEqual(win_text, "stalemate"))
+    {
+        winner = 3;
+    }
+
+    Call_StartForward(gfRoundEnd);
+    Call_PushCell(winner);
+    Call_Finish();
+}
+
+
+public MRESReturn Hook_OnRoundStart()
+{
+    Call_StartForward(gfRoundStart);
+    Call_Finish();
+    return MRES_Ignored;
+}
 public MRESReturn Hook_OnPlayerWeaponPickup(int pThis, DHookParam hParams)
 {
     if(!hParams.IsNull(1))
@@ -1004,5 +1052,39 @@ public int Native_GetEntityMaxHealth(Handle plugin, int params)
     if(!IsValidEntity(entity)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity inded %d is invalid", entity);
 
     return GetEntProp(entity, Prop_Data, "m_iMaxHealth");
+}
+
+public int Native_SendPhoneMessageLocation(Handle plugin, int params)
+{
+    int length;
+
+    GetNativeStringLength(1, length);
+    char[] szMessage = new char[length+2];
+    GetNativeString(1, szMessage, length+1);
+
+    float vecLoc[3];
+    GetNativeArray(2, vecLoc, 3);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::SendMessageLocation");
+        PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+        PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByValue);
+        PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+        PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CZombiePanic::SendMessageLocation. Update your game data!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        SDKCall(hSDKCall, szMessage, vecLoc, GetNativeCell(3), GetNativeCell(4));
+    }
+    return 1;
 }
 

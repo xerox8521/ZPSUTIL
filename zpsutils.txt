@@ -191,9 +191,35 @@
                 "linux"     "@_Z21CZP_Player_SetEscapedP10CZP_Playerbb"
                 "windows"   "\x55\x8B\xEC\x56\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\x06\x8B\xCE\x8B\x80\xFC\x07\x00\x00"
             }
+            /*
+            * Unique String #ZP_ZPS_Hardcore
+            */
+            "CZombiePanic::RoundStart"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic10RoundStartEv"
+                "windows"   "\x55\x8B\xEC\x83\xEC\x40\x53\x57"
+            }
+            /*
+            * Almost Unique String: tutor_phone_message. Has 2 results.
+            * Correct function calls the phone_msg event.
+            */
+            "CZombiePanic::SendMessageLocation"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic16SendPhoneMessageEPKc6Vectorbb"
+                "windows"   "\x55\x8B\xEC\x83\xEC\x10\x56\x57\xFF\x75\x08"
+            }
         }
         "Functions"
         {
+            "OnRoundStart"
+            {
+                "signature" "CZombiePanic::RoundStart"
+                "callconv"  "thiscall"
+                "return"    "void"
+                "this"      "ignore"
+            }
             "OnPlayerWeaponPickup"
             {
                 "signature" "CZP_Player::PlayerWeaponPickup"

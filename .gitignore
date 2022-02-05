@@ -2,6 +2,7 @@
 *.exe
 *.exe.11
 *.bat
+*.smx
 #Include directories
 include/*
 include1.11

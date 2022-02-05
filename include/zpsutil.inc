@@ -40,6 +40,13 @@ enum
     TEAM_ZOMBIE 
 }
 
+enum 
+{
+    WINNER_SURVIVORS = 1,
+    WINNER_ZOMBIES,
+    WINNER_STALEMATE
+}
+
 
 // Return Plugin_Changed if you have modifed team
 // Return Plugin_Handled to prevent the player from joining a team.
@@ -108,6 +115,15 @@ native void RemoveCosmeticWear(int client, const char[] szModelName);
 // Also works on players.
 native void SetEntityMaxHealth(int entity, int maxhp);
 native int GetEntityMaxHealth(int entity);
+
+
+
+forward void OnRoundStart();
+// See the WINNER_ enumeration for possible values.
+forward void OnRoundEnd(int winner);
+
+
+native void SendPhoneMessageLocation(const char[] szMessage, float vecPos[3], bool bUnknown, bool bPlaySound);
 
 
 public SharedPlugin __pl_zpsutil = 

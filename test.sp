@@ -54,3 +54,4 @@ GetServerPort(char[] buffer, int maxlength)
         SDKCall(hSDKCall, buffer, maxlength);
     }
 }
+
