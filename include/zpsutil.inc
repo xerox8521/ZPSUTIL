@@ -128,6 +128,7 @@ native void SendPhoneMessage(const char[] szMessage, bool bPlaySound = true);
 native void SendPhoneMessageToPlayer(int client, const char[] szMessage);
 
 // Sets the current round time.
+// Time is in seconds
 native void SetRoundTime(float flRoundTime);
 native void AddRoundTime(float flTime);
 
@@ -136,6 +137,10 @@ native float GetRoundRemainingTime();
 native int GetRandomTeamPlayer(int iTeamIndex, bool bAlive);
 native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
+
+native int GetWeaponOwner(int weapon);
+
+native bool IsMeleeWeapon(int weapon);
 
 
 public SharedPlugin __pl_zpsutil = 

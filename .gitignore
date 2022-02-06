@@ -1,11 +1,9 @@
 #Executables
 *.exe
-*.exe.11
 *.bat
 *.smx
 #Include directories
 include/*
-include1.11
 !*include/zpsutil.inc
-uncertain.txt
-zps_*.txt
+*.txt
+!zpsutil.txt

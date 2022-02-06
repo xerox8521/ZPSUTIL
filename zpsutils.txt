@@ -29,6 +29,11 @@
                 "linux"     "514"
                 "windows"   "513"
             }
+            "CWeaponZPBase::IsMeleeWeapon"
+            {
+                "linux"     "391"
+                "windows"   "390"
+            }
         }
         "Signatures"
         {

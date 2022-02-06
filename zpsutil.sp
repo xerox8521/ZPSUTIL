@@ -231,6 +231,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("GetRandomTeamPlayer",         Native_GetRandomTeamPlayer);
     CreateNative("GetRandomCarrier",            Native_GetRandomCarrier);
     CreateNative("GetWinCount",                 Native_GetWinCount);
+    CreateNative("GetWeaponOwner",              Native_GetWeaponOwner);
+    CreateNative("IsMeleeWeapon",               Native_IsMeleeWeapon);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -1178,6 +1180,7 @@ public int Native_SetRoundTime(Handle plugin, int params)
     }
     if(hSDKCall != null)
     {
+        flRoundTime = (GetGameTime() + flRoundTime);
         SDKCall(hSDKCall, flRoundTime);
     }
     return 1;
@@ -1297,4 +1300,45 @@ public int Native_GetWinCount(Handle plugin, int params)
         return SDKCall(hSDKCall, GetNativeCell(1));
     }
     return -1;
+}
+
+public int Native_GetWeaponOwner(Handle plugin, int params)
+{
+    int weapon = GetNativeCell(1);
+    if(weapon < MaxClients || !IsValidEntity(weapon)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity index %d is invalid", weapon);
+
+    char szClassName[32];
+    GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+    if(StrContains(szClassName, "weapon_") != -1 && StrEqual(szClassName, "item_delivery") == false) return ThrowNativeError(SP_ERROR_NATIVE, "Entity %s(%d) is not a weapon", szClassName, weapon);
+
+    return GetEntPropEnt(weapon, Prop_Send, "m_hOwner");
+}
+
+public int Native_IsMeleeWeapon(Handle plugin, int params)
+{
+    int weapon = GetNativeCell(1);
+    if(weapon < MaxClients || !IsValidEntity(weapon)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity index %d is invalid", weapon);
+
+    char szClassName[32];
+    GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+    if(StrContains(szClassName, "weapon_") != -1 && StrEqual(szClassName, "item_delivery") == false) return ThrowNativeError(SP_ERROR_NATIVE, "Entity %s(%d) is not a weapon", szClassName, weapon);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Entity);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Virtual, "CWeaponZPBase::IsMeleeWeapon");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CWeaponZPBase::IsMeleeWeapon. Update your game data!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, GetNativeCell(1));
+    }
+    return 0;
 }
