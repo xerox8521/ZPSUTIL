@@ -61,6 +61,15 @@ forward Action OnPlayerGiveWeaponToPlayer(int client, int receiver, int weapon, 
 // Return Plugin Handled to prevent the player from picking up the weapon.
 forward Action OnPlayerPickupWeapon(int client, int weapon, const char[] szWeaponName, bool bUnknown, int inventorySlot, bool bForcePickupSlot);
 
+// Used to determine the amount of hp a inoculator gives when primary attack is used.
+// Return Plugin_Changed when you have modified health.
+forward Action OnInoculatorGiveHealthPrimary(int inoculator, int owner, int &health);
+// Used to determine the amount of hp a inoculator gives when secondary attack is used
+// Return Plugin_Changed when you have modified health.
+forward Action OnInoculatorGiveHealthSecondary(int inoculator, int owner, int &health);
+// Return Plugin_Handled to prevent the inoculator to perform the action.
+forward Action OnInoculatorExecuteAction(int inoculator, int owner, int target, bool bPrimary);
+
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
 native bool IsWeaponSwitchAllowed(int client);
@@ -141,12 +150,14 @@ native int GetWinCount(bool Survivors); // Confirm the bool meaning
 native int GetWeaponOwner(int weapon);
 native int GetPrimaryAmmoType(int weapon);
 native int GetWeaponClip1(int weapon);
+native int GetWeaponMaxClip1(int weapon);
 
 native bool IsMeleeWeapon(int weapon);
 native bool IsDualSlotWeapon(int weapon);
 
 native float GetWeaponDamage(int weapon);
 native float GetWeaponWeight(int weapon);
+native float GetMeleeWeaponRange(int weapon);
 
 
 public SharedPlugin __pl_zpsutil = 
@@ -210,6 +221,7 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("IsDualSlotWeapon");
    MarkNativeAsOptional("GetWeaponDamage");
    MarkNativeAsOptional("GetWeaponWeight");
+   MarkNativeAsOptional("GetWeaponMaxClip1");
 }
 #endif
 

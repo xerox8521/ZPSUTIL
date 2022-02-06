@@ -36,6 +36,9 @@ GameData g_pGameConfig = null;
 
 DynamicHook dhHandleJoinTeam = null;
 DynamicHook dhVoiceMenu = null;
+DynamicHook dhHealthPrimary = null;
+DynamicHook dhHealthSecondary = null;
+DynamicHook dhHealthExecuteAction = null;
 
 DynamicDetour ddOnCheckAFK = null;
 DynamicDetour ddOnGetSpeed = null;
@@ -52,6 +55,9 @@ GlobalForward gfGiveWeaponToPlayer = null;
 GlobalForward gfPlayerWeaponPickup = null;
 GlobalForward gfRoundStart = null;
 GlobalForward gfRoundEnd = null;
+GlobalForward gfHealthPrimary = null;
+GlobalForward gfHealthSecondary = null;
+GlobalForward gfHealthExecuteAction = null;
 
 
 ConVar sm_zps_util_colored_tags = null;
@@ -98,6 +104,26 @@ public void OnPluginStart()
     if(dhVoiceMenu == null)
     {
         SetFailState("Failed to setup OnPlayerVoiceMenu hook. Update your Gamedata!");
+        return;
+    }
+    
+    dhHealthPrimary = DynamicHook.FromConf(g_pGameConfig, "OnGiveHealthPrimary");
+    if(dhHealthPrimary == null)
+    {
+        SetFailState("Failed to setup OnGiveHealthPrimary hook. Update your Gamedata!");
+        return;
+    }
+    dhHealthSecondary = DynamicHook.FromConf(g_pGameConfig, "OnGiveHealthSecondary");
+    if(dhHealthSecondary == null)
+    {
+        SetFailState("Failed to setup OnGiveHealthSecondary hook. Update your Gamedata!");
+        return;
+    }
+    
+    dhHealthExecuteAction = DynamicHook.FromConf(g_pGameConfig, "OnExecuteAction");
+    if(dhHealthExecuteAction == null)
+    {
+        SetFailState("Failed to setup OnExecuteAction hook. Update your Gamedata!");
         return;
     }
     
@@ -189,6 +215,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     gfGiveWeaponToPlayer = CreateGlobalForward("OnPlayerGiveWeaponToPlayer", ET_Event, Param_Cell, Param_Cell, Param_Cell, Param_String);
     gfPlayerWeaponPickup = CreateGlobalForward("OnPlayerPickupWeapon", ET_Event, Param_Cell, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell);
 
+    gfHealthPrimary = CreateGlobalForward("OnInoculatorGiveHealthPrimary", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
+    gfHealthSecondary = CreateGlobalForward("OnInoculatorGiveHealthSecondary", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
+    gfHealthExecuteAction = CreateGlobalForward("OnInoculatorExecuteAction", ET_Event, Param_Cell, Param_Cell, Param_Cell);
+
     gfRoundStart = CreateGlobalForward("OnRoundStart", ET_Ignore);
     gfRoundEnd = CreateGlobalForward("OnRoundEnd", ET_Ignore, Param_Cell);
 
@@ -238,6 +268,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("GetPrimaryAmmoType",          Native_GetPrimaryAmmoType);
     CreateNative("GetWeaponClip1",              Native_GetClip1);
     CreateNative("IsDualSlotWeapon",            Native_IsDualSlot);
+    CreateNative("GetWeaponMaxClip1",           Native_GetMaxClip1);
+    CreateNative("GetMeleeWeaponRange",         Native_GetMeleeRange);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -250,6 +282,16 @@ public void OnClientPutInServer(int client)
     dhVoiceMenu.HookEntity(Hook_Post, client, Hook_OnPlayerVoiceText);
 
     bModifiedChat[client] = false;
+}
+
+public void OnEntityCreated(int entity, const char[] szClassName)
+{
+    if(StrEqual(szClassName, "weapon_inoculator") || StrEqual(szClassName, "weapon_inoculator_delay") || StrEqual(szClassName, "weapon_inoculator_full"))
+    {
+        dhHealthPrimary.HookEntity(Hook_Post, entity, Hook_OnGiveHealthPrimary);
+        dhHealthSecondary.HookEntity(Hook_Post, entity, Hook_OnGiveHealthSecondary);
+        dhHealthExecuteAction.HookEntity(Hook_Post, entity, Hook_OnExecuteAction);
+    }
 }
 
 public Action OnClientSayCommand(int client, const char[] szCommand, const char[] szArgs)
@@ -313,6 +355,70 @@ public void Event_RoundEnd(Event event, const char[] szName, bool dontBroadcast)
 }
 
 
+public MRESReturn Hook_OnGiveHealthPrimary(int pThis, DHookReturn hReturn)
+{
+    int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
+    int health = hReturn.Value;
+
+    Action result = Plugin_Continue;
+    Call_StartForward(gfHealthPrimary);
+    Call_PushCell(pThis);
+    Call_PushCell(owner);
+    Call_PushCellRef(health);
+    Call_Finish(result);
+
+    if(result == Plugin_Changed)
+    {
+        hReturn.Value = health;
+        return MRES_Supercede;
+    }
+    return MRES_Ignored;
+}
+
+public MRESReturn Hook_OnGiveHealthSecondary(int pThis, DHookReturn hReturn)
+{
+    int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
+    int health = hReturn.Value;
+
+    Action result = Plugin_Continue;
+    Call_StartForward(gfHealthSecondary);
+    Call_PushCell(pThis);
+    Call_PushCell(owner);
+    Call_PushCellRef(health);
+    Call_Finish(result);
+
+    if(result == Plugin_Changed)
+    {
+        hReturn.Value = health;
+        return MRES_Supercede;
+    }
+    return MRES_Ignored;
+}
+
+public MRESReturn Hook_OnExecuteAction(int pThis, DHookParam hParams)
+{
+    if(hParams.IsNull(1))
+        return MRES_Ignored;
+
+    int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
+    int target = hParams.Get(1);
+    bool bPrimary = hParams.Get(2);
+
+
+    Action result = Plugin_Continue;
+    Call_StartForward(gfHealthExecuteAction);
+    Call_PushCell(pThis);
+    Call_PushCell(owner);
+    Call_PushCell(target);
+    Call_PushCell(bPrimary);
+    Call_Finish(result);
+
+    if(result == Plugin_Handled)
+    {
+        return MRES_Supercede;
+    }
+    return MRES_Ignored;
+}
 public MRESReturn Hook_OnRoundStart()
 {
     Call_StartForward(gfRoundStart);
@@ -1319,15 +1425,9 @@ public int Native_GetWeaponOwner(Handle plugin, int params)
     return GetEntPropEnt(weapon, Prop_Send, "m_hOwner");
 }
 
-public int Native_IsMeleeWeapon(Handle plugin, int params)
+
+bool IsMeleeWeapon(int weapon)
 {
-    int weapon = GetNativeCell(1);
-    if(weapon < MaxClients || !IsValidEntity(weapon)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity index %d is invalid", weapon);
-
-    char szClassName[32];
-    GetEntityClassname(weapon, szClassName, sizeof(szClassName));
-    if(StrContains(szClassName, "weapon_") != -1 && StrEqual(szClassName, "item_delivery") == false) return ThrowNativeError(SP_ERROR_NATIVE, "Entity %s(%d) is not a weapon", szClassName, weapon);
-
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {
@@ -1338,14 +1438,25 @@ public int Native_IsMeleeWeapon(Handle plugin, int params)
         if(hSDKCall == null)
         {
             SetFailState("Failed to setup SDKCall for CWeaponZPBase::IsMeleeWeapon. Update your game data!");
-            return 0;
+            return false;
         }
     }
     if(hSDKCall != null)
     {
-        return SDKCall(hSDKCall, GetNativeCell(1));
+        return SDKCall(hSDKCall, weapon);
     }
-    return 0;
+    return false;
+}
+
+public int Native_IsMeleeWeapon(Handle plugin, int params)
+{
+    int weapon = GetNativeCell(1);
+    if(weapon < MaxClients || !IsValidEntity(weapon)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity index %d is invalid", weapon);
+
+    char szClassName[32];
+    GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+    if(StrContains(szClassName, "weapon_") != -1 && StrEqual(szClassName, "item_delivery") == false) return ThrowNativeError(SP_ERROR_NATIVE, "Entity %s(%d) is not a weapon", szClassName, weapon);
+    return IsMeleeWeapon(weapon);
 }
 
 public any Native_GetWeaponDamage(Handle plugin, int params)
@@ -1433,6 +1544,67 @@ public any Native_IsDualSlot(Handle plugin, int params)
         return SDKCall(hSDKCall, GetNativeCell(1));
     }
     return 0;
+}
+
+public any Native_GetMaxClip1(Handle plugin, int params)
+{
+    int weapon = GetNativeCell(1);
+    if(weapon < MaxClients || !IsValidEntity(weapon)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity index %d is invalid", weapon);
+
+    char szClassName[32];
+    GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+    if(StrContains(szClassName, "weapon_") != -1 && StrEqual(szClassName, "item_delivery") == false) return ThrowNativeError(SP_ERROR_NATIVE, "Entity %s(%d) is not a weapon", szClassName, weapon);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Entity);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Virtual, "CBaseCombatWeapon::GetMaxClip1");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CBaseCombatWeapon::GetMaxClip1. Update your game data!");
+            return -1;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, GetNativeCell(1));
+    }
+    return -1;
+}
+
+public any Native_GetMeleeRange(Handle plugin, int params)
+{
+    int weapon = GetNativeCell(1);
+    if(weapon < MaxClients || !IsValidEntity(weapon)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity index %d is invalid", weapon);
+
+    char szClassName[32];
+    GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+    if(StrContains(szClassName, "weapon_") != -1 && StrEqual(szClassName, "item_delivery") == false) return ThrowNativeError(SP_ERROR_NATIVE, "Entity %s(%d) is not a weapon", szClassName, weapon);
+
+    if(!IsMeleeWeapon(weapon)) return ThrowNativeError(SP_ERROR_NATIVE, "Entity %s(%d) is not a melee weapon", szClassName, weapon);
+
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Entity);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Virtual, "CWeaponMeleeBase::GetRange");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            SetFailState("Failed to setup SDKCall for CWeaponMeleeBase::GetRange. Update your game data!");
+            return -1;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, GetNativeCell(1));
+    }
+    return -1;
 }
 
 public any Native_GetPrimaryAmmoType(Handle plugin, int params)

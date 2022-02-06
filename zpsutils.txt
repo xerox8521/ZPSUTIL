@@ -49,6 +49,31 @@
                 "linux"     "258"
                 "windows"   "257"
             }
+            "CBaseCombatWeapon::GetMaxClip1"
+            {
+                "linux"     "332"
+                "windows"   "331"
+            }
+            "CWeaponMeleeBase::GetRange"
+            {
+                "linux"     "401"
+                "windows"   "400"
+            }
+            "CBaseWeapon_Health::GiveHealth_Primary"
+            {
+                "linux"     "404"
+                "windows"   "403"
+            }
+            "CBaseWeapon_Health::GiveHealth_Secondary"
+            {
+                "linux"     "405"
+                "windows"   "404"
+            }
+            "CBaseWeapon_Health::ExecuteAction"
+            {
+                "linux"     "408"
+                "windows"   "407"
+            }
         }
         "Signatures"
         {
@@ -319,6 +344,38 @@
         }
         "Functions"
         {
+            "OnGiveHealthPrimary"
+            {
+                "offset"    "CBaseWeapon_Health::GiveHealth_Primary"
+                "callconv"  "thiscall"
+                "return"    "int"
+                "this"      "entity"
+            }
+            "OnGiveHealthSecondary"
+            {
+                "offset"    "CBaseWeapon_Health::GiveHealth_Secondary"
+                "callconv"  "thiscall"
+                "return"    "int"
+                "this"      "entity"
+            }
+            "OnExecuteAction"
+            {
+                "offset"    "CBaseWeapon_Health::ExecuteAction"
+                "callconv"  "thiscall"
+                "return"    "void"
+                "this"      "entity"
+                "arguments"
+                {
+                    "pTarget"
+                    {
+                        "type"  "cbaseentity"
+                    }
+                    "bPrimary"
+                    {
+                        "type"  "bool"
+                    }
+                }
+            }
             "OnRoundStart"
             {
                 "signature" "CZombiePanic::RoundStart"
