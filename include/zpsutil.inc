@@ -70,6 +70,14 @@ forward Action OnInoculatorGiveHealthSecondary(int inoculator, int owner, int &h
 // Return Plugin_Handled to prevent the inoculator to perform the action.
 forward Action OnInoculatorExecuteAction(int inoculator, int owner, int target, bool bPrimary);
 
+
+forward void OnRoundStart();
+// See the WINNER_ enumeration for possible values.
+forward void OnRoundEnd(int winner);
+// Called when the player escapes via a trigger_escape.
+// trigger is the trigger entity
+forward void OnEscapeByTrigger(int trigger, int client, bool bSendMessage);
+
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
 native bool IsWeaponSwitchAllowed(int client);
@@ -125,11 +133,6 @@ native void RemoveCosmeticWear(int client, const char[] szModelName);
 native void SetEntityMaxHealth(int entity, int maxhp);
 native int GetEntityMaxHealth(int entity);
 
-
-
-forward void OnRoundStart();
-// See the WINNER_ enumeration for possible values.
-forward void OnRoundEnd(int winner);
 
 
 native void SendPhoneMessageLocation(const char[] szMessage, float vecPos[3], bool bUnknown, bool bPlaySound = true);

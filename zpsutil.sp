@@ -46,6 +46,7 @@ DynamicDetour ddOnGiveAmmoToPlayer = null;
 DynamicDetour ddOnGiveWeaponToPlayer = null;
 DynamicDetour ddOnPlayerWeaponPickup = null;
 DynamicDetour ddOnRoundStart = null;
+DynamicDetour ddOnEscapeByTrigger = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
@@ -58,6 +59,7 @@ GlobalForward gfRoundEnd = null;
 GlobalForward gfHealthPrimary = null;
 GlobalForward gfHealthSecondary = null;
 GlobalForward gfHealthExecuteAction = null;
+GlobalForward gfEscapeByTrigger = null;
 
 
 ConVar sm_zps_util_colored_tags = null;
@@ -182,6 +184,14 @@ public void OnPluginStart()
         return;
     }
     ddOnRoundStart.Enable(Hook_Post, Hook_OnRoundStart);
+    
+    ddOnEscapeByTrigger = DynamicDetour.FromConf(g_pGameConfig, "OnEscapeByTrigger");
+    if(ddOnEscapeByTrigger == null)
+    {
+        SetFailState("Failed to setup OnEscapeByTrigger detour. Update your Gamedata!");
+        return;
+    }
+    ddOnEscapeByTrigger.Enable(Hook_Post, Hook_OnEscapeByTrigger);
 
     HookEvent("endslate", Event_RoundEnd);
 
@@ -218,6 +228,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     gfHealthPrimary = CreateGlobalForward("OnInoculatorGiveHealthPrimary", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
     gfHealthSecondary = CreateGlobalForward("OnInoculatorGiveHealthSecondary", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
     gfHealthExecuteAction = CreateGlobalForward("OnInoculatorExecuteAction", ET_Event, Param_Cell, Param_Cell, Param_Cell);
+
+    gfEscapeByTrigger = CreateGlobalForward("OnEscapeByTrigger", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 
     gfRoundStart = CreateGlobalForward("OnRoundStart", ET_Ignore);
     gfRoundEnd = CreateGlobalForward("OnRoundEnd", ET_Ignore, Param_Cell);
@@ -355,11 +367,27 @@ public void Event_RoundEnd(Event event, const char[] szName, bool dontBroadcast)
 }
 
 
+public MRESReturn Hook_OnEscapeByTrigger(int pThis, DHookParam hParam)
+{
+    if(hParam.IsNull(1))
+        return MRES_Ignored;
+    
+    int client = hParam.Get(1);
+    bool bSendMessage = hParam.Get(2);
+
+    Call_StartForward(gfEscapeByTrigger);
+    Call_PushCell(pThis);
+    Call_PushCell(client);
+    Call_PushCell(bSendMessage);
+    Call_Finish();
+
+    return MRES_Ignored;
+}
 public MRESReturn Hook_OnGiveHealthPrimary(int pThis, DHookReturn hReturn)
 {
     int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
     int health = hReturn.Value;
-
+    
     Action result = Plugin_Continue;
     Call_StartForward(gfHealthPrimary);
     Call_PushCell(pThis);
