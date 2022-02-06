@@ -34,6 +34,21 @@
                 "linux"     "391"
                 "windows"   "390"
             }
+            "CWeaponZPBase::GetWeaponDamage"
+            {
+                "linux"     "395"
+                "windows"   "394"
+            }
+            "CWeaponZPBase::WeaponWeight"
+            {
+                "linux"     "396"
+                "windows"   "395"
+            }
+            "CBaseCombatWeapon::IsDualSlot"
+            {
+                "linux"     "258"
+                "windows"   "257"
+            }
         }
         "Signatures"
         {

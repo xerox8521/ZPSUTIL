@@ -139,8 +139,14 @@ native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
 
 native int GetWeaponOwner(int weapon);
+native int GetPrimaryAmmoType(int weapon);
+native int GetWeaponClip1(int weapon);
 
 native bool IsMeleeWeapon(int weapon);
+native bool IsDualSlotWeapon(int weapon);
+
+native float GetWeaponDamage(int weapon);
+native float GetWeaponWeight(int weapon);
 
 
 public SharedPlugin __pl_zpsutil = 
@@ -196,6 +202,14 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("GetRandomTeamPlayer");
    MarkNativeAsOptional("GetRandomCarrier");
    MarkNativeAsOptional("GetRoundRemainingTime");
+   MarkNativeAsOptional("GetWinCount");
+   MarkNativeAsOptional("GetWeaponOwner");
+   MarkNativeAsOptional("GetPrimaryAmmoType");
+   MarkNativeAsOptional("GetWeaponClip1");
+   MarkNativeAsOptional("IsMeleeWeapon");
+   MarkNativeAsOptional("IsDualSlotWeapon");
+   MarkNativeAsOptional("GetWeaponDamage");
+   MarkNativeAsOptional("GetWeaponWeight");
 }
 #endif
 
