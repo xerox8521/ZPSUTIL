@@ -285,6 +285,17 @@
                 "linux"     "@_ZN12CZombiePanic16GetRandomCarrierEb"
                 "windows"   "\x55\x8B\xEC\x83\xEC\x14\xA1\x2A\x2A\x2A\x2A\x56\x33\xF6"
             }
+            /*
+            * Unique String: "OnWinsHit" Note: NOT m_OnWinsHit!!
+            * String itself is in CLogic_WinCounter::CheckWins
+            * First function call is CZombiePanic::GetWins
+            */
+            "CZombiePanic::GetWins"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic7GetWinsEb"
+                "windows"   "\x55\x8B\xEC\x80\x7D\x08\x00\x74\x2A\x8B\x81\x9C\x02\x00\x00"
+            }
         }
         "Functions"
         {

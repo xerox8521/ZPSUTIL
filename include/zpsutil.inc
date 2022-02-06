@@ -135,6 +135,7 @@ native float GetRoundRemainingTime();
 
 native int GetRandomTeamPlayer(int iTeamIndex, bool bAlive);
 native int GetRandomCarrier(bool bAlive);
+native int GetWinCount(bool Survivors); // Confirm the bool meaning
 
 
 public SharedPlugin __pl_zpsutil = 
