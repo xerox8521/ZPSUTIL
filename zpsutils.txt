@@ -122,7 +122,7 @@
                 "windows"   "\x55\x8B\xEC\x56\xFF\x75\x08\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x85\xC0"
             }
             /*
-            * Unique String:
+            * Unique String: AFKSystem_MovedToLobby
             */
             "CZP_Player::CheckAFK"
             {
