@@ -124,7 +124,9 @@ native void SetPlayerEscaped(int client, bool bToObserver = true, bool bPlaySoun
 // Can be enabled in ZP!S Options -> Custom Content otherwise this does nothing.
 native void OpenSteamOverlay(int client, const char[] szURL);
 
-// cl_allow_musics_from_network 
+// Players need to have "Allow music from network(HTTP/HTTPS)" or cl_allow_musics_from_network 1
+// Can be enabled in ZP!S Options -> Custom Content otherwise this does nothing
+native void PlayMusic(const char[] szTrack, const char[] szTitle);
 
 
 native void ToggleWeaponSwitch(int client, bool bAllow);
