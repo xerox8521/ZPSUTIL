@@ -210,12 +210,10 @@ public void OnPluginStart()
         OnClientPutInServer(i);
     }
 
-    int gmManager = FindEntityByClassname(INVALID_ENT_REFERENCE, "zps_gamemode_manager");
-    if(IsValidEntity(gmManager))
-    {
-        refGMManager = EntIndexToEntRef(gmManager);
-        PrintToConsole(0, "[ZPSUTIL]: Found zps_gamemode_manager: %d", gmManager);
-    }
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureStart", OnCaptureStart);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureStart", OnCaptureStart);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureCompleted", OnCaptureEnd);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureCompleted", OnCaptureEnd);
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -289,12 +287,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("GetMeleeWeaponRange",         Native_GetMeleeRange);
     CreateNative("PlayMusic",                   Native_PlayMusic);
 
-
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureStart", OnCaptureStart);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureStart", OnCaptureStart);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureCompleted", OnCaptureEnd);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureCompleted", OnCaptureEnd);
-
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
 }
@@ -350,7 +342,18 @@ public void OnEntityCreated(int entity, const char[] szClassName)
         dhHealthSecondary.HookEntity(Hook_Post, entity, Hook_OnGiveHealthSecondary);
         dhHealthExecuteAction.HookEntity(Hook_Post, entity, Hook_OnExecuteAction);
     }
+    if(StrEqual(szClassName, "zps_gamemode_manager"))
+    {
+        RequestFrame(OnGameModeManagerSpawn, entity);
+    }
 }
+
+public void OnGameModeManagerSpawn(int entity)
+{
+    refGMManager = EntIndexToEntRef(entity);
+    PrintToConsole(0, "[ZPSUTIL]: Found zps_gamemode_manager: %d", entity);
+}
+
 
 public Action OnClientSayCommand(int client, const char[] szCommand, const char[] szArgs)
 {
@@ -1732,6 +1735,7 @@ public any Native_PlayMusic(Handle plugin, int params)
         event.SetString("title", szTitle);
         event.Fire();
     }
+    return 1;
 }
 
 
