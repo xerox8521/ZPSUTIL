@@ -78,6 +78,11 @@ forward void OnRoundEnd(int winner);
 // trigger is the trigger entity
 forward void OnEscapeByTrigger(int trigger, int client, bool bSendMessage);
 
+// Called when a team starts capturing a trigger_capturepoint_zp.
+forward void OnStartCapture(int team);
+// Called when a team completed captured a trigger_capturepoint_zp.
+forward void OnCaptured(int team);
+
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
 native bool IsWeaponSwitchAllowed(int client);

@@ -60,6 +60,8 @@ GlobalForward gfHealthPrimary = null;
 GlobalForward gfHealthSecondary = null;
 GlobalForward gfHealthExecuteAction = null;
 GlobalForward gfEscapeByTrigger = null;
+GlobalForward gfCaptureStart = null;
+GlobalForward gfCaptured = null;
 
 
 ConVar sm_zps_util_colored_tags = null;
@@ -229,6 +231,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     gfHealthSecondary = CreateGlobalForward("OnInoculatorGiveHealthSecondary", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
     gfHealthExecuteAction = CreateGlobalForward("OnInoculatorExecuteAction", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 
+    gfCaptureStart = CreateGlobalForward("OnStartCapture", ET_Ignore, Param_Cell);
+    gfCaptured = CreateGlobalForward("OnCaptured", ET_Ignore, Param_Cell);
+
     gfEscapeByTrigger = CreateGlobalForward("OnEscapeByTrigger", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 
     gfRoundStart = CreateGlobalForward("OnRoundStart", ET_Ignore);
@@ -283,6 +288,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("GetWeaponMaxClip1",           Native_GetMaxClip1);
     CreateNative("GetMeleeWeaponRange",         Native_GetMeleeRange);
 
+
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureStart", OnCaptureStart);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureStart", OnCaptureStart);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureCompleted", OnCaptureEnd);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureCompleted", OnCaptureEnd);
+
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
 }
@@ -294,6 +305,40 @@ public void OnClientPutInServer(int client)
     dhVoiceMenu.HookEntity(Hook_Post, client, Hook_OnPlayerVoiceText);
 
     bModifiedChat[client] = false;
+}
+
+public void OnCaptureEnd(const char[] output, int caller, int activator, float delay)
+{
+    int teamindex = TEAM_LOBBY;
+    if(StrEqual(output, "m_OnZombieCaptureCompleted"))
+    {
+        teamindex = TEAM_ZOMBIE;
+    }
+    else if(StrEqual(output, "m_OnHumanCaptureCompleted"))
+    {
+        teamindex = TEAM_SURVIVOR;
+    }
+
+    Call_StartForward(gfCaptured);
+    Call_PushCell(teamindex);
+    Call_Finish();
+}
+
+public void OnCaptureStart(const char[] output, int caller, int activator, float delay)
+{
+    int teamindex = TEAM_LOBBY;
+    if(StrEqual(output, "m_OnZombieCaptureStart"))
+    {
+        teamindex = TEAM_ZOMBIE;
+    }
+    else if(StrEqual(output, "m_OnHumanCaptureStart"))
+    {
+        teamindex = TEAM_SURVIVOR;
+    }
+
+    Call_StartForward(gfCaptureStart);
+    Call_PushCell(teamindex);
+    Call_Finish();
 }
 
 public void OnEntityCreated(int entity, const char[] szClassName)
