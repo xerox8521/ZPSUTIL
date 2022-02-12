@@ -95,30 +95,20 @@ native bool PlayerHasDeliveryItem(int client);
 
 native float GetFlashBattery(int client);
 native float SetFlashBattery(int client, float battery);
+native float GetPlayerWeight(int client);
 
 native void PlayerDropWeapon(int client, int weapon, bool bUknown = false);
-
-native int GivePlayerWeapon(int client, const char[] szWeaponName);
-
-native int GetRemainingInvSlots(int client);
-
-native int GetActiveWeapon(int client);
-
+native void RespawnPlayer(int client);
 // internally calls Precache on the model
 native void SetArmModel(int client, const char[] szArmModel);
-
 // Pick your poison
 native void SetPlayerArmor(int client, int armor);
 native void SetPlayerArmour(int client, int armour);
-
-native float GetPlayerWeight(int client);
 native void AddPlayerWeight(int client, float weight);
 native void RemovePlayerWeight(int client, float weight);
-
 // This function internally makes all the function calls required
 // to make the player properly escape. Eg. Drop Weapons, Armor, Stop any pending infection etc.
 native void SetPlayerEscaped(int client, bool bToObserver = true, bool bPlaySound = true);
-
 // Player needs to have "Allow servers to open my Steam overlay to web pages" or cl_allow_servers_to_use_steam_overlay 1
 // Can be enabled in ZP!S Options -> Custom Content otherwise this does nothing.
 native void OpenSteamOverlay(int client, const char[] szURL);
@@ -134,6 +124,11 @@ native void SetInfection(int client, bool bInfection, bool bForced, int infectio
 native void SetInfectionResistance(int client, int percentage, float time);
 native void CreateCosmeticWear(int client, const char[] szModelName);
 native void RemoveCosmeticWear(int client, const char[] szModelName);
+
+native int GivePlayerWeapon(int client, const char[] szWeaponName);
+native int GetRemainingInvSlots(int client);
+native int GetActiveWeapon(int client);
+
 
 // Also works on players.
 native void SetEntityMaxHealth(int entity, int maxhp);
