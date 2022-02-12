@@ -28,9 +28,7 @@ public Action Command_Test2(int client, int args)
 }
 public Action Command_Test(int client, int args)
 {
-    char svPort[32];
-    GetServerPort(svPort, sizeof(svPort));
-    PrintToConsole(0, "Server Port: %s", svPort);
+    PrintToConsole(0, "IsCustom: %d", IsCustom());
     return Plugin_Handled;
 }
 

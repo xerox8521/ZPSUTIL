@@ -79,9 +79,9 @@ forward void OnRoundEnd(int winner);
 forward void OnEscapeByTrigger(int trigger, int client, bool bSendMessage);
 
 // Called when a team starts capturing a trigger_capturepoint_zp.
-forward void OnStartCapture(int team);
+forward void OnStartCapture(int trigger, int team);
 // Called when a team completed captured a trigger_capturepoint_zp.
-forward void OnCaptured(int team);
+forward void OnCaptured(int trigger, int team);
 
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
@@ -89,7 +89,6 @@ native bool IsWeaponSwitchAllowed(int client);
 native bool IsInPhoneTrigger(int client);
 native bool IsRoaring(int client);
 native bool IsBerzerking(int client);
-native bool IsCustom();
 native bool PlayerHasAmmoType(int client, AmmoType ammoType);
 native bool PlayerHasActiveIED(int client);
 native bool PlayerHasDeliveryItem(int client);
@@ -147,15 +146,33 @@ native void SendPhoneMessage(const char[] szMessage, bool bPlaySound = true);
 native void SendPhoneMessageToPlayer(int client, const char[] szMessage);
 
 // Sets the current round time.
-// Time is in seconds
+// Time is in seconds.
+// SetRoundTime internally adds GetGameTime to the value specified
 native void SetRoundTime(float flRoundTime);
 native void AddRoundTime(float flTime);
+native void AddZombieLives(int lives);
+native void SetZombieLives(int lives);
+// flForce being a multiplicator. 1.0 = default
+// Automatically resets on map change
+native void SetHandsPushForce(float flForce);
+native void SetZombieArmsPushForce(float flForce);
+native void SetCarrierArmsPushForce(float flForce);
+native void SetFreeForAll(bool bEnable);
 
 native float GetRoundRemainingTime();
+// 1.0 being default
+native float GetHandsPushForce();
+native float GetZombieArmsPushForce();
+native float GetCarrierArmsPushForce();
+
+native bool IsHardcore();
+native bool IsFreeForAll();
+native bool IsCustom();
 
 native int GetRandomTeamPlayer(int iTeamIndex, bool bAlive);
 native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
+native int GetZombeLives();
 
 native int GetWeaponOwner(int weapon);
 native int GetPrimaryAmmoType(int weapon);
@@ -232,6 +249,18 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("GetWeaponDamage");
    MarkNativeAsOptional("GetWeaponWeight");
    MarkNativeAsOptional("GetWeaponMaxClip1");
+   MarkNativeAsOptional("AddZombieLives");
+   MarkNativeAsOptional("SetZombieLives");
+   MarkNativeAsOptional("SetHandsPushForce");
+   MarkNativeAsOptional("SetZombieArmsPushForce");
+   MarkNativeAsOptional("SetCarrierArmsPushForce");
+   MarkNativeAsOptional("SetFreeForAll");
+   MarkNativeAsOptional("GetHandsPushForce");
+   MarkNativeAsOptional("GetZombieArmsPushForce");
+   MarkNativeAsOptional("GetCarrierArmsPushForce");
+   MarkNativeAsOptional("IsHardcore");
+   MarkNativeAsOptional("IsFreeForAll");
+   MarkNativeAsOptional("GetZombeLives");
 }
 #endif
 

@@ -278,28 +278,6 @@
                 "windows"   "\x55\x8B\xEC\x51\x57\x8B\x7D\x08\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A"
             }
             /*
-            * Unique String: SetCurrentRoundTime
-            * function above is CASRoundManager::SetCurrentRoundTime
-            * Which calls CZombiePanic::SetRoundTime
-            */
-            "CZombiePanic::SetRoundTime"
-            {
-                "library"   "server"
-                "linux"     "@_ZN12CZombiePanic12SetRoundTimeEf"
-                "windows"   "\x55\x8B\xEC\x51\x56\x8B\xF1\x8D\x4D\x08\x8B\x86\x48\x02\x00\x00"
-            }
-            /*
-            * Unique String: AddCurrentRoundTime
-            * function above is CASRoundManager::AddCurrentRoundTime
-            * Which calls CZombiePanic::AddRoundTime
-            */
-            "CZombiePanic::AddRoundTime"
-            {
-                "library"   "server"
-                "linux"     "@_ZN12CZombiePanic12AddRoundTimeEf"
-                "windows"   "\x55\x8B\xEC\x51\x56\x8B\xF1\x8D\x4D\x08\xF3\x0F\x10\x86\x48\x02\x00\x00"
-            }
-            /*
             * Unique String "Round Time Remaining:"
             * There will be 2 snprintf function calls to format the time.
             * Right above that is CZombiePanic::GetRoundRemainingTime

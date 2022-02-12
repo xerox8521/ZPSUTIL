@@ -69,8 +69,6 @@ ConVar sm_zps_afk_admin_immunity = null;
 
 bool bModifiedChat[MAXPLAYERS+1];
 
-int refGMManager = INVALID_ENT_REFERENCE;
-
 public Plugin myinfo = 
 {
     name = "[ZPS] Utils",
@@ -229,8 +227,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     gfHealthSecondary = CreateGlobalForward("OnInoculatorGiveHealthSecondary", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
     gfHealthExecuteAction = CreateGlobalForward("OnInoculatorExecuteAction", ET_Event, Param_Cell, Param_Cell, Param_Cell);
 
-    gfCaptureStart = CreateGlobalForward("OnStartCapture", ET_Ignore, Param_Cell);
-    gfCaptured = CreateGlobalForward("OnCaptured", ET_Ignore, Param_Cell);
+    gfCaptureStart = CreateGlobalForward("OnStartCapture", ET_Ignore, Param_Cell, Param_Cell);
+    gfCaptured = CreateGlobalForward("OnCaptured", ET_Ignore, Param_Cell, Param_Cell);
 
     gfEscapeByTrigger = CreateGlobalForward("OnEscapeByTrigger", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 
@@ -286,6 +284,19 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("GetWeaponMaxClip1",           Native_GetMaxClip1);
     CreateNative("GetMeleeWeaponRange",         Native_GetMeleeRange);
     CreateNative("PlayMusic",                   Native_PlayMusic);
+    CreateNative("GetZombieLives",              Native_GetZombieLives);
+    CreateNative("AddZombieLives",              Native_AddZombieLives);
+    CreateNative("SetZombieLives",              Native_SetZombieLives);
+    CreateNative("IsHardcore",                  Native_IsHardcore);
+    CreateNative("GetHandsPushForce",           Native_GetHandsPushForce);
+    CreateNative("SetHandsPushForce",           Native_SetHandsPushForce);
+    CreateNative("SetZombieArmsPushForce",      Native_SetZombieArmsPushForce);
+    CreateNative("GetZombieArmsPushForce",      Native_GetZombieArmsPushForce);
+    CreateNative("GetCarrierArmsPushForce",     Native_GetCarrierArmsPushForce);
+    CreateNative("SetCarrierArmsPushForce",     Native_SetCarrierArmsPushForce);
+    CreateNative("IsFreeForAll",                Native_IsFreeForAll);
+    CreateNative("SetFreeForAll",               Native_FreeForAll);
+    
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -313,6 +324,7 @@ public void OnCaptureEnd(const char[] output, int caller, int activator, float d
     }
 
     Call_StartForward(gfCaptured);
+    Call_PushCell(caller);
     Call_PushCell(teamindex);
     Call_Finish();
 }
@@ -330,6 +342,7 @@ public void OnCaptureStart(const char[] output, int caller, int activator, float
     }
 
     Call_StartForward(gfCaptureStart);
+    Call_PushCell(caller);
     Call_PushCell(teamindex);
     Call_Finish();
 }
@@ -342,16 +355,6 @@ public void OnEntityCreated(int entity, const char[] szClassName)
         dhHealthSecondary.HookEntity(Hook_Post, entity, Hook_OnGiveHealthSecondary);
         dhHealthExecuteAction.HookEntity(Hook_Post, entity, Hook_OnExecuteAction);
     }
-    if(StrEqual(szClassName, "zps_gamemode_manager"))
-    {
-        RequestFrame(OnGameModeManagerSpawn, entity);
-    }
-}
-
-public void OnGameModeManagerSpawn(int entity)
-{
-    refGMManager = EntIndexToEntRef(entity);
-    PrintToConsole(0, "[ZPSUTIL]: Found zps_gamemode_manager: %d", entity);
 }
 
 
@@ -678,6 +681,77 @@ void StripColors(const char[] szMessage, char[] szBuffer, int maxlength)
 }
 
 
+public int Native_SetHandsPushForce(Handle plugin, int params)
+{
+    float flForce = GetNativeCell(1);
+    GameRules_SetPropFloat("m_flCustomHandsPushForce", flForce);
+    return 1;
+}
+
+public any Native_GetHandsPushForce(Handle plugin, int params)
+{
+    return GameRules_GetPropFloat("m_flCustomHandsPushForce");
+}
+
+public int Native_SetZombieArmsPushForce(Handle plugin, int params)
+{
+    float flForce = GetNativeCell(1);
+    GameRules_SetPropFloat("m_flCustomZombieArmsPushForce", flForce);
+    return 1;
+}
+
+public any Native_GetCarrierArmsPushForce(Handle plugin, int params)
+{
+    return GameRules_GetPropFloat("m_flCustomCarrierArmsPushForce");
+}
+
+public int Native_SetCarrierArmsPushForce(Handle plugin, int params)
+{
+    float flForce = GetNativeCell(1);
+    GameRules_SetPropFloat("m_flCustomCarrierArmsPushForce", flForce);
+    return 1;
+}
+
+public any Native_GetZombieArmsPushForce(Handle plugin, int params)
+{
+    return GameRules_GetPropFloat("m_flCustomZombieArmsPushForce");
+}
+
+public int Native_IsHardcore(Handle plugin, int params)
+{
+    return GameRules_GetProp("m_bInHardcore");
+}
+
+public int Native_IsFreeForAll(Handle plugin, int params)
+{
+    return GameRules_GetProp("m_bIsFreeForAll");
+}
+
+public int Native_FreeForAll(Handle plugin, int params)
+{
+    bool bEnable = GetNativeCell(1);
+    GameRules_SetProp("m_bIsFreeForAll", bEnable);
+    return 1;
+}
+
+public int Native_GetZombieLives(Handle plugin, int params)
+{
+    return GameRules_GetProp("m_iZombieLives");
+}
+
+public int Native_AddZombieLives(Handle plugin, int params)
+{
+    int iZombieLives = GameRules_GetProp("m_iZombieLives");
+    iZombieLives += GetNativeCell(1);
+    GameRules_SetProp("m_iZombieLives", iZombieLives);
+    return 1;
+}
+
+public int Native_SetZombieLives(Handle plugin, int params)
+{
+    GameRules_SetProp("m_iZombieLives", GetNativeCell(1));
+    return 1;
+}
 public int Native_IsCarrier(Handle plugin, int params)
 {
     int client = GetNativeCell(1);
@@ -695,14 +769,7 @@ public int Native_IsInfected(Handle plugin, int params)
 
 public int Native_IsCustom(Handle plugin, int params)
 {
-    int gmManager = EntRefToEntIndex(refGMManager);
-    if(!IsValidEntity(gmManager)) return ThrowNativeError(SP_ERROR_NATIVE, "zps_gamemode_manager not valid");
-
-    int offset = FindSendPropInfo("CGameMode_Manager", "m_bInHardcore");
-
-    PrintToConsole(0, "[OFFSET]: %d | Hardcore: %d", offset, GetEntData(gmManager, offset));
-
-    return GetEntProp(gmManager, Prop_Send, "m_bInHardcore");
+    return GameRules_GetProp("m_iIsCustom");
 }
 
 public int Native_IsWeaponSwitchAllowed(Handle plugin, int params)
@@ -1353,24 +1420,8 @@ public int Native_SetRoundTime(Handle plugin, int params)
 {
     float flRoundTime = GetNativeCell(1);
 
-    static Handle hSDKCall = null;
-    if(hSDKCall == null)
-    {
-        StartPrepSDKCall(SDKCall_GameRules);
-        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::SetRoundTime");
-        PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
-        hSDKCall = EndPrepSDKCall();
-        if(hSDKCall == null)
-        {
-            SetFailState("Failed to setup SDKCall for CZombiePanic::SetRoundTime. Update your game data!");
-            return 0;
-        }
-    }
-    if(hSDKCall != null)
-    {
-        flRoundTime = (GetGameTime() + flRoundTime);
-        SDKCall(hSDKCall, flRoundTime);
-    }
+    flRoundTime = (GetGameTime() + flRoundTime);
+    GameRules_SetPropFloat("m_flRoundTime", flRoundTime);
     return 1;
 }
 
@@ -1378,23 +1429,9 @@ public int Native_AddRoundTime(Handle plugin, int params)
 {
     float flRoundTime = GetNativeCell(1);
 
-    static Handle hSDKCall = null;
-    if(hSDKCall == null)
-    {
-        StartPrepSDKCall(SDKCall_GameRules);
-        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::AddRoundTime");
-        PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
-        hSDKCall = EndPrepSDKCall();
-        if(hSDKCall == null)
-        {
-            SetFailState("Failed to setup SDKCall for CZombiePanic::AddRoundTime. Update your game data!");
-            return 0;
-        }
-    }
-    if(hSDKCall != null)
-    {
-        SDKCall(hSDKCall, flRoundTime);
-    }
+    float flCurrentRoundTime = GameRules_GetPropFloat("m_flRoundTime");
+    flCurrentRoundTime += flRoundTime;
+    GameRules_SetPropFloat("m_flRoundTime", flCurrentRoundTime);
     return 1;
 }
 
