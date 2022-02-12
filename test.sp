@@ -28,11 +28,13 @@ public Action Command_Test2(int client, int args)
 }
 public Action Command_Test(int client, int args)
 {
-    PrintToConsole(0, "IsCustom: %d", IsCustom());
+    PrintToConsole(0, "Zombielives: %d", GetZombieLives());
+    AddZombieLives(20);
+    PrintToConsole(0, "Zombielives: %d", GetZombieLives());
     return Plugin_Handled;
 }
 
-GetServerPort(char[] buffer, int maxlength)
+stock GetServerPort(char[] buffer, int maxlength)
 {
     static Handle hSDKCall = null;
     if(hSDKCall == null)

@@ -172,7 +172,7 @@ native bool IsCustom();
 native int GetRandomTeamPlayer(int iTeamIndex, bool bAlive);
 native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
-native int GetZombeLives();
+native int GetZombieLives();
 
 native int GetWeaponOwner(int weapon);
 native int GetPrimaryAmmoType(int weapon);
@@ -260,7 +260,7 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("GetCarrierArmsPushForce");
    MarkNativeAsOptional("IsHardcore");
    MarkNativeAsOptional("IsFreeForAll");
-   MarkNativeAsOptional("GetZombeLives");
+   MarkNativeAsOptional("GetZombieLives");
 }
 #endif
 
