@@ -187,6 +187,11 @@ native float GetWeaponWeight(int weapon);
 native float GetMeleeWeaponRange(int weapon);
 
 
+native int CreateFragGrenade(float Pos[3], float Angle[3], float Velocity[3], float angularVelocity[3], int thrower, float flExplodeTime, bool bUnknown1, bool bUnknown2);
+
+native void DetonateGrenade(int grenade);
+
+
 public SharedPlugin __pl_zpsutil = 
 {
 	name = "zpsutil",
@@ -261,6 +266,8 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("IsHardcore");
    MarkNativeAsOptional("IsFreeForAll");
    MarkNativeAsOptional("GetZombieLives");
+   MarkNativeAsOptional("CreateFragGrenade");
+   MarkNativeAsOptional("DetonateGrenade");
 }
 #endif
 

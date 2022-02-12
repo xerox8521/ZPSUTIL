@@ -74,6 +74,11 @@
                 "linux"     "408"
                 "windows"   "407"
             }
+            "CBaseGrenade::Detonate"
+            {
+                "linux"     "240"
+                "windows"   "239"
+            }
         }
         "Signatures"
         {
@@ -329,6 +334,16 @@
                 "library"   "server"
                 "linux"     "@_ZN15CTrigger_Escape6EscapeEP11CBaseEntityb"
                 "windows"   "\x55\x8B\xEC\x56\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\x06\x8B\xCE\x8B\x80\x68\x01\x00\x00"
+            }
+            /*
+                Semi Unique String: "models/weapons/w_grenade_thrown.mdl"
+                Has 3 results look for the one where the function call requires multiple parameters.
+            */
+            "Fraggrenade_Create"
+            {
+                "library"   "server"
+                "linux"     "@_Z18Fraggrenade_CreatePKcRK6VectorRK6QAngleS3_S3_P11CBaseEntityfbb"
+                "windows"   "\x55\x8B\xEC\x53\x8B\x5D\x1C"
             }
         }
         "Functions"
