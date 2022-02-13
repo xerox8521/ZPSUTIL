@@ -279,7 +279,7 @@
             "CZombiePanic::SendPhoneMessageToPlayer"
             {
                 "library"   "server"
-                "linux"     "@_ZN12CZombiePanic16SendPhoneMessageEPKcb"
+                "linux"     "@_ZN12CZombiePanic24SendPhoneMessageToPlayerEP10CZP_PlayerPKc"
                 "windows"   "\x55\x8B\xEC\x51\x57\x8B\x7D\x08\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A"
             }
             /*
