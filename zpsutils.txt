@@ -287,7 +287,7 @@
             * There will be 2 snprintf function calls to format the time.
             * Right above that is CZombiePanic::GetRoundRemainingTime
             */
-            "CZombiePanic::GetRoundRemainingTim"
+            "CZombiePanic::GetRoundRemainingTime"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic21GetRoundRemainingTimeEv"
