@@ -169,6 +169,31 @@ native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
 native int GetZombieLives();
 
+// LINUX ONLY FUNCTIONS START
+
+native void CleanupMap();
+native void SetIntermission(bool bState);
+native void DropAllWeapons(int client);
+
+native int GetRandomPlayer(bool bAlive);
+// Given a client returns the best carrier that is currently using roar.
+native int GetBestRoaringCarrier(int client);
+
+native bool IsInTestMode();
+native bool IsWarmup();
+native bool IsRoundOngoing(bool bIncludeTestMode = false);
+native bool IsInPanic(int client);
+native bool IsAwayFromKeyboard(int client);
+// This is only for the BUILD IN Gagging system.
+// This has NOTHING to do with sourcemods sm_gag command!!
+native bool IsGagged(int client);
+// This is only for the BUILD IN Mute system.
+// This has NOTHING to do with sourcemods sm_mute command!!
+native bool IsMuted(int client);
+
+
+// LINUX ONLY FUNCTIONS END
+
 native int GetWeaponOwner(int weapon);
 native int GetPrimaryAmmoType(int weapon);
 native int GetWeaponClip1(int weapon);

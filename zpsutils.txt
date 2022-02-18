@@ -4,350 +4,269 @@
     {
         "Offsets"
         {
+            "OS"
+            {
+                "linux"     "1"
+                "windows"   "2"
+            }
             "CZP_Player::HandleCommand_JoinTeam"
             {
                 "linux"     "501"
-                "windows"   "500"
             }
             "CZP_Player::VoiceMenu"
             {
                 "linux"     "504"
-                "windows"   "503"
             }
             "CZP_Player::VoiceMenuText"
             {
                 "linux"     "505"
-                "windows"   "504"
             }
             "CZP_Player::SetInfection"
             {
                 "linux"     "513"
-                "windows"   "512"
             }
             "CZP_Player::SetInfectionResistance"
             {
                 "linux"     "514"
-                "windows"   "513"
             }
             "CWeaponZPBase::IsMeleeWeapon"
             {
                 "linux"     "391"
-                "windows"   "390"
             }
             "CWeaponZPBase::GetWeaponDamage"
             {
                 "linux"     "395"
-                "windows"   "394"
             }
             "CWeaponZPBase::WeaponWeight"
             {
                 "linux"     "396"
-                "windows"   "395"
             }
             "CBaseCombatWeapon::IsDualSlot"
             {
                 "linux"     "258"
-                "windows"   "257"
             }
             "CBaseCombatWeapon::GetMaxClip1"
             {
                 "linux"     "332"
-                "windows"   "331"
             }
             "CWeaponMeleeBase::GetRange"
             {
                 "linux"     "401"
-                "windows"   "400"
             }
             "CBaseWeapon_Health::GiveHealth_Primary"
             {
                 "linux"     "404"
-                "windows"   "403"
             }
             "CBaseWeapon_Health::GiveHealth_Secondary"
             {
                 "linux"     "405"
-                "windows"   "404"
             }
             "CBaseWeapon_Health::ExecuteAction"
             {
                 "linux"     "408"
-                "windows"   "407"
             }
             "CBaseGrenade::Detonate"
             {
                 "linux"     "240"
-                "windows"   "239"
             }
         }
         "Signatures"
         {
-            /*
-            *   Unique String: reset_arms few lines above the string.
-            *   Look for something like "if ( v36 == -1 || off_108F1BC4[4 * (this[681] & 0xFFF) + 2] != v36 >> 12 )"
-            *   and the function call that takes a 0 as param is the DropWeapon Function.
-            */
             "CZP_Player::DropWeapon"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player10DropWeaponEP17CBaseCombatWeaponb"
-                "windows"   "\x55\x8B\xEC\x8B\x45\x08\x83\xEC\x18\x56\x8B\xF1\x57"
             }
-            /*
-            *   Unique String: player_voice which is in CZP_Player::VoiceMenuText
-            *   Function directly above is UTIL_CurrentMapLog
-            *   and above that function is ZPSUTILS_StripColors.
-            */
             "ZPSUTILS_StripColors"
             {
                 "library"   "server"
                 "linux"     "@_Z19ZPUTILS_StripColorsPKc"
-                "windows"   "\x55\x8B\xEC\x6A\xFF\x68\x2A\x2A\x2A\x2A\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x58\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\xF0\x53\x56\x57\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00\x00\x8B\x75\x08\xE8\x2A\x2A\x2A\x2A"
             }
-            /*
-            *   Unique String: "cos_merge" 
-            *   Function itself that the Unique string is being called from is CZP_Player::CreateCosmeticWear
-            */
             "CZP_Player::CreateCosmeticWear"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player18CreateCosmeticWearEPKc"
-                "windows"   "\x55\x8B\xEC\x51\x53\x6A\xFF"
             }
-            /*
-            *   Unique String: "void CosmeticRemove" from the AngelScript function list
-            *   look for something like (*(void (__thiscall **)(int *, const char *, const char *, int (**)(), int, _DWORD, _DWORD, _DWORD))(v36 + 84))
-            *   directly above is the UTIL_Cosmetic_Remove function
-            *   Which calls CZP_Player::RemoveCosmeticWear(const char* szModelName)
-            */
             "CZP_Player::RemoveCosmeticWear"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player18RemoveCosmeticWearEPKc"
-                "windows"   "\x55\x8B\xEC\x56\xFF\x75\x08\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x85\xC0"
             }
-            /*
-            * Unique String: AFKSystem_MovedToLobby
-            */
             "CZP_Player::CheckAFK"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player8CheckAFKEv"
-                "windows"   "\x55\x8B\xEC\x51\x56\x8B\xF1\xB9\x2A\x2A\x2A\x2A\x68\x2A\x2A\x2A\x2A\x56"
             }
-            /*
-            *  Called from virtual function CZP_Player::PlayerDeathThink
-            *  Find the vtable with ClassInformer Plugin.
-            *  Find the CZP_Player Entry with a high number
-            *  Goto the start of the vtable and run the vtable dumper script
-            *  Search the offset of CZP_Player::PlayerDeathThink. Crossrefernce it with the offset of https://asherkin.github.io/vtable/
-            *  Copy the sub_XYZ name which is CZP_Player::PlayerDeathThink
-            *  Find the copied sub_XYZ in the function list.
-            *  First function call in CZP_Player::PlayerDeathThink is CBaseEntity::AllowGlow
-            *  Second function call is CZP_Player::DoRespawn
-            */
             "CZP_Player::DoRespawn"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player9DoRespawnEv"
-                "windows"   "\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x83\xF8\x02\x75\x2A\xA1\x2A\x2A\x2A\x2A"
             }
-            /*
-            *   Unique String: slowdown_run
-            */
             "CZP_Player::GetSpeed"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player8GetSpeedEv"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x14\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\xF3\x0F\x10\x86\xD0\x18\x00\x00"
             }
-            /*
-            *   Unique String: ZP_Chat_Give_Ammo_Deny
-            */
             "CZP_Player::GiveAmmoToPlayer"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player16GiveAmmoToPlayerEPS_"
-                "windows"   "\x55\x8B\xEC\x81\xEC\xE0\x00\x00\x00\xA1\x2A\x2A\x2A\x2A\x33\xC5\x89\x45\xFC\x56"
             }
-            /*
-            * Unique String "bool GiveWeapon" AngelScript function
-            * above is CZP_Player_GiveWeapon which calls CZP_Player::GiveWeapon
-            */
             "CZP_Player::GiveWeapon"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player10GiveWeaponEPKcib"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x10\x53\x8B\x5D\x08\x89\x4D\xFC"
             }
-            /*
-            *   Unique String: ZP_Chat_Give_Weapon_Deny
-            */
             "CZP_Player::GiveWeaponToPlayer"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player18GiveWeaponToPlayerEPS_P17CBaseCombatWeapon"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x10\x56\x57\x8B\x7D\x08\x8B\xF1\x89\x75\xFC"
             }
-            /*
-            * Unique String: ZP_Chat_Give_Weapon_Deny
-            * Last function call above the unique string
-            */
             "CZP_Player::NumSlots"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player8NumSlotsEv"
-                "windows"   "\x53\x56\xBE\x05\x00\x00\x00"
             }
-            /*
-            * Semi Unique String. Only called in 3 Functions
-            * One is CZP_Player::PlayerDropUnusedAmmo which contains
-            * CZP_Player::HasAmmoType. Look for the sub_ check that has the values 1-5 as parameter
-            * and is called multiple times.
-            */
             "CZP_Player::HasAmmoType"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player11HasAmmoTypeEi"
-                "windows"   "\x55\x8B\xEC\x53\x8B\x5D\x08\x56\x57\xBE\x01\x00\x00\x00\x8D\xB9\xA8\x0A\x00\x00"
             }
-            /*
-            * Unique String tutor_inventory_full
-            */
             "CZP_Player::PlayerWeaponPickup"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player18PlayerWeaponPickupEP17CBaseCombatWeaponbib"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x89\x5D\xF4\x8B\x03"
             }
-            /*
-            * Unique String: armmodel_as
-            * String points to CZP_Player::SetArmModel(void);
-            * Function is called twice one of it is CZP_Player::SetArmModel(const char*);
-            */
             "CZP_Player::SetArmModel"
             {
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player11SetArmModelEPKc"
-                "windows"   "\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x56\xFF\x75\x08"
             }
-            /*
-            * Unique string: #ZP_Chat_PlayerEscaped
-            * Calling the function that AngelScript calls as it handles everything for us
-            */
             "CZP_Player_SetEscaped"
             {
                 "library"   "server"
                 "linux"     "@_Z21CZP_Player_SetEscapedP10CZP_Playerbb"
-                "windows"   "\x55\x8B\xEC\x56\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\x06\x8B\xCE\x8B\x80\xFC\x07\x00\x00"
             }
-            /*
-            * Unique String #ZP_ZPS_Hardcore
-            */
             "CZombiePanic::RoundStart"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic10RoundStartEv"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x40\x53\x57"
             }
-            /*
-            * Almost Unique String: tutor_phone_message. Has 2 results.
-            * Correct function calls the phone_msg event.
-            */
             "CZombiePanic::SendPhoneMessageLocation"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic16SendPhoneMessageEPKc6Vectorbb"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x10\x56\x57\xFF\x75\x08"
             }
-            /*
-            * Unique String: "void SendPhoneMessage"
-            * Function above is UTIL_SendPhoneMessage
-            * Which calls CZombiePanic::SendPhoneMessage 
-            */
             "CZombiePanic::SendPhoneMessage"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic16SendPhoneMessageEPKcb"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x0C\xFF\x75\x0C"
             }
-            /*
-            * Unique String: "void SendPhoneMessageToPlayer"
-            * Function above is UTIL_SendPhoneMessageToPlayer
-            * Which calls CZombiePanic::SendPhoneMessageToPlayer 
-            */
             "CZombiePanic::SendPhoneMessageToPlayer"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic24SendPhoneMessageToPlayerEP10CZP_PlayerPKc"
-                "windows"   "\x55\x8B\xEC\x51\x57\x8B\x7D\x08\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A"
             }
-            /*
-            * Unique String "Round Time Remaining:"
-            * There will be 2 snprintf function calls to format the time.
-            * Right above that is CZombiePanic::GetRoundRemainingTime
-            */
             "CZombiePanic::GetRoundRemainingTime"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic21GetRoundRemainingTimeEv"
-                "windows"   "\xA1\x2A\x2A\x2A\x2A\xD9\x81\x48\x02\x00\x00"
             }
-            /*
-            * Unique String #ZP_ZPS_Hardcore
-            * Function is directly below the unique string.
-            */
             "CZombiePanic::GetRandomTeamPlayer"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic19GetRandomTeamPlayerE7ZPTeamsb"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x1C\xA1\x2A\x2A\x2A\x2A\xB9\x01\x00\x00\x00"
             }
-            /*
-            * Unique String #ZP_ZPS_Hardcore
-            * Function is directly below CZombiePanic::GetRandomTeamPlayer in CZombiePanic::RoundStart
-            */
             "CZombiePanic::GetRandomCarrier"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic16GetRandomCarrierEb"
-                "windows"   "\x55\x8B\xEC\x83\xEC\x14\xA1\x2A\x2A\x2A\x2A\x56\x33\xF6"
             }
-            /*
-            * Unique String: "OnWinsHit" Note: NOT m_OnWinsHit!!
-            * String itself is in CLogic_WinCounter::CheckWins
-            * First function call is CZombiePanic::GetWins
-            */
             "CZombiePanic::GetWins"
             {
                 "library"   "server"
                 "linux"     "@_ZN12CZombiePanic7GetWinsEb"
-                "windows"   "\x55\x8B\xEC\x80\x7D\x08\x00\x74\x2A\x8B\x81\x9C\x02\x00\x00"
             }
-            /*
-            * Semi Unique string: "#ZPlayer.SurvivorEscape"
-            * One result is CZP_Player_SetEscaped.
-            * Other result is CTrigger_Escape::Escape
-            */
             "CTrigger_Escape::Escape"
             {
                 "library"   "server"
                 "linux"     "@_ZN15CTrigger_Escape6EscapeEP11CBaseEntityb"
-                "windows"   "\x55\x8B\xEC\x56\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\x06\x8B\xCE\x8B\x80\x68\x01\x00\x00"
             }
-            /*
-                Semi Unique String: "models/weapons/w_grenade_thrown.mdl"
-                Has 3 results look for the one where the function call requires multiple parameters.
-            */
             "Fraggrenade_Create"
             {
                 "library"   "server"
                 "linux"     "@_Z18Fraggrenade_CreatePKcRK6VectorRK6QAngleS3_S3_P11CBaseEntityfbb"
-                "windows"   "\x55\x8B\xEC\x53\x8B\x5D\x1C"
+            }
+            "CZombiePanic::CleanupMap"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic10CleanupMapEv"
+            }
+            "CZombiePanic::GetRandomPlayer"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic15GetRandomPlayerEb"
+            }
+            "CZombiePanic::GetBestRoaringCarrier"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic22GrabBestRoaringCarrierEP10CZP_Player"
+            }
+            "CZombiePanic::IsInTestMode"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic12IsInTestModeEv"
+            }
+            "CZombiePanic::IsRoundOngoing"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic14IsRoundOngoingEb"
+            }
+            "CZombiePanic::IsWarmup"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic8IsWarmupEv"
+            }
+            "CZombiePanic::SetIntermission"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic15SetIntermissionEb"
+            }
+            "CZP_Player::DropAllWeapons"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player14DropAllWeaponsEv"
+            }
+            "CZP_Player::IsAwayFromKeyboard"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player18IsAwayFromKeyboardEv"
+            }
+            "CZP_Player::IsGagged"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player8IsGaggedEv"
+            }
+            "CZP_Player::IsMuted"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player7IsMutedEv"
+            }
+            "CheckEmitReasonablePhysicsSpew"
+            {
+                "library"   "server"
+                "linux"     "@_Z30CheckEmitReasonablePhysicsSpewv"
+                "windows"   "\xFF\x15\x2A\x2A\x2A\x2A\xDD\x05\x2A\x2A\x2A\x2A\xD9\xC9"
             }
         }
         "Functions"
         {
+            "OnCheckEmitReasonablePhysicsSpew"
+            {
+                "signature" "CheckEmitReasonablePhysicsSpew"
+                "callconv"  "cdecl"
+                "return"    "bool"
+            }
             "OnEscapeByTrigger"
             {
                 "signature" "CTrigger_Escape::Escape"

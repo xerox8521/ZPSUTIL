@@ -49,6 +49,7 @@ DynamicDetour ddOnGiveWeaponToPlayer = null;
 DynamicDetour ddOnPlayerWeaponPickup = null;
 DynamicDetour ddOnRoundStart = null;
 DynamicDetour ddOnEscapeByTrigger = null;
+DynamicDetour ddOnCheckEmitReasonablePhysicsSpew = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
@@ -71,9 +72,11 @@ ConVar sm_zps_afk_admin_immunity = null;
 
 bool bModifiedChat[MAXPLAYERS+1];
 
+bool IsLinux = false;
+
 public Plugin myinfo = 
 {
-    name = "[ZPS] Utils",
+    name = "[ZPS] Utils Linux Only",
     author = "XeroX",
     description = "Provides various utilties for Zombie Panic! Source",
     version = PLUGIN_VERSION,
@@ -96,6 +99,8 @@ public void OnPluginStart()
         SetFailState("Gamedata file zpsutils.txt is missing");
         return;
     }
+
+    IsLinux = (g_pGameConfig.GetOffset("OS") == 1);
     
     dhHandleJoinTeam = DynamicHook.FromConf(g_pGameConfig, "OnPlayerJoinTeam");
     if(dhHandleJoinTeam == null)
@@ -194,6 +199,14 @@ public void OnPluginStart()
         return;
     }
     ddOnEscapeByTrigger.Enable(Hook_Post, Hook_OnEscapeByTrigger);
+    
+    ddOnCheckEmitReasonablePhysicsSpew = DynamicDetour.FromConf(g_pGameConfig, "OnCheckEmitReasonablePhysicsSpew");
+    if(ddOnCheckEmitReasonablePhysicsSpew == null)
+    {
+        SetFailState("Failed to setup OnCheckEmitReasonablePhysicsSpew detour. Update your Gamedata!");
+        return;
+    }
+    ddOnCheckEmitReasonablePhysicsSpew.Enable(Hook_Post, Hook_OnCheckEmitReasonablePhysicsSpew);
 
     HookEvent("endslate", Event_RoundEnd);
 
@@ -300,7 +313,15 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("SetFreeForAll",               Native_FreeForAll);
     CreateNative("CreateFragGrenade",           Native_CreateFragGrenade);
     CreateNative("DetonateGrenade",             Native_DetonateGrenade);
-    
+    CreateNative("CleanupMap",                  Native_CleanupMap);
+    CreateNative("GetRandomPlayer",             Native_GetRandomPlayer);
+    CreateNative("GetBestRoaringCarrier",       Native_GetBestRoaringCarrier);
+    CreateNative("IsInTestMode",                Native_IsInTestMode);
+    CreateNative("IsRoundOngoing",              Native_IsRoundOngoing);
+    CreateNative("IsWarmup",                    Native_IsWarmup);
+    CreateNative("SetIntermission",             Native_SetIntermission);
+    CreateNative("IsInPanic",                   Native_IsInPanic);
+    CreateNative("IsAwayFromKeyBoard",          Native_IsAFK);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -422,6 +443,12 @@ public void Event_RoundEnd(Event event, const char[] szName, bool dontBroadcast)
     Call_Finish();
 }
 
+
+public MRESReturn Hook_OnCheckEmitReasonablePhysicsSpew(DHookReturn hReturn)
+{
+    hReturn.Value = false;
+    return MRES_Supercede;
+}
 
 public MRESReturn Hook_OnEscapeByTrigger(int pThis, DHookParam hParam)
 {
@@ -1825,6 +1852,331 @@ public any Native_DetonateGrenade(Handle plugin, int params)
     }
     return 1;
 }
+public any Native_CleanupMap(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::CleanupMap");
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZombiePanic::CleanupMap. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        SDKCall(hSDKCall);
+    }
+    return 1;
+}
+
+public any Native_GetRandomPlayer(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::GetRandomPlayer");
+        PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+        PrepSDKCall_SetReturnInfo(SDKType_CBasePlayer, SDKPass_Pointer);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZombiePanic::GetRandomPlayer. Update your gamedata!");
+            return INVALID_ENT_REFERENCE;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, GetNativeCell(1));
+    }
+    return INVALID_ENT_REFERENCE;
+}
+
+public any Native_GetBestRoaringCarrier(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::GetBestRoaringCarrier");
+        PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
+        PrepSDKCall_SetReturnInfo(SDKType_CBasePlayer, SDKPass_Pointer);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZombiePanic::GetBestRoaringCarrier. Update your gamedata!");
+            return INVALID_ENT_REFERENCE;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, client);
+    }
+    return INVALID_ENT_REFERENCE;
+}
+
+public any Native_IsInTestMode(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::IsInTestMode");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZombiePanic::IsInTestMode. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall);
+    }
+    return 0;
+}
+
+public any Native_IsRoundOngoing(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::IsRoundOngoing");
+        PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZombiePanic::IsRoundOngoing. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, GetNativeCell(1));
+    }
+    return 0;
+}
+
+public any Native_IsWarmup(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::IsWarmup");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZombiePanic::IsWarmup. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall);
+    }
+    return 0;
+}
+
+public any Native_SetIntermission(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_GameRules);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZombiePanic::SetIntermission");
+        PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZombiePanic::SetIntermission. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        SDKCall(hSDKCall, GetNativeCell(1));
+    }
+    return 1;
+}
+
+public any Native_DropAllWeapons(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Player);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::DropAllWeapons");
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZP_Player::DropAllWeapons. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        SDKCall(hSDKCall, client);
+    }
+    return 1;
+}
+
+public any Native_IsAFK(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Player);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::IsAwayFromKeyboard");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZP_Player::IsAwayFromKeyboard. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, client);
+    }
+    return 0;
+}
+
+public any Native_IsGagged(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Player);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::IsGagged");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZP_Player::IsGagged. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, client);
+    }
+    return 0;
+}
+
+public any Native_IsMuted(Handle plugin, int params)
+{
+    if(!IsLinux)
+    {
+        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
+    }
+
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Player);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::IsMuted");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CZP_Player::IsMuted. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, client);
+    }
+    return 0;
+}
+
+public any Native_IsInPanic(Handle plugin, int params)
+{
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    return (GetEntPropFloat(client, Prop_Send, "m_flPanicTimer") > GetGameTime());
+
+}
+
 public any Native_PlayMusic(Handle plugin, int params)
 {
     int length;
