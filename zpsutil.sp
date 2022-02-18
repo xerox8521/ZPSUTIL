@@ -465,15 +465,16 @@ public MRESReturn Hook_OnCheckEmitReasonablePhysicsSpew(DHookReturn hReturn)
 
 public MRESReturn Hook_OnIncrementArmorValue(int pThis, DHookParam hParam)
 {
-    int nMaxValue = hParam.Get(3);
+    int nMaxValue = hParam.Get(2);
     Call_StartForward(gfIncrementArmorValue);
+    Call_PushCell(pThis);
     Call_PushCell(hParam.Get(1));
     Call_PushCellRef(nMaxValue);
     Action result = Plugin_Continue;
     Call_Finish(result);
     if(result == Plugin_Changed)
     {
-        hParam.Set(3, nMaxValue);
+        hParam.Set(2, nMaxValue);
     }
     return MRES_ChangedHandled;
 }
