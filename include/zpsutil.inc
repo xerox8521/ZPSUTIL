@@ -188,7 +188,6 @@ native int GetRandomTeamPlayer(int iTeamIndex, bool bAlive);
 native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
 native int GetZombieLives();
-
 native int GetRandomPlayer(bool bAlive);
 // Given a client returns the best carrier that is currently using roar.
 native int GetBestRoaringCarrier(int client);
@@ -295,6 +294,24 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("GetZombieLives");
    MarkNativeAsOptional("CreateFragGrenade");
    MarkNativeAsOptional("DetonateGrenade");
+   MarkNativeAsOptional("DropAllWeapons");
+   MarkNativeAsOptional("IsAwayFromKeyboard");
+   MarkNativeAsOptional("IsInPanic");
+   MarkNativeAsOptional("IsGagged");
+   MarkNativeAsOptional("IsMuted");
+   MarkNativeAsOptional("RespawnPlayer");
+   MarkNativeAsOptional("PlayMusic");
+   MarkNativeAsOptional("HasPlayerNamedItem");
+   MarkNativeAsOptional("CleanupMap");
+   MarkNativeAsOptional("SetIntermission");
+   MarkNativeAsOptional("GetRandomPlayer");
+   MarkNativeAsOptional("GetBestRoaringCarrier");
+   MarkNativeAsOptional("IsInTestMode");
+   MarkNativeAsOptional("IsWarmup");
+   MarkNativeAsOptional("IsRoundOngoing");
+   MarkNativeAsOptional("GetMeleeWeaponRange");
+   MarkNativeAsOptional("IsChristmas");
+   MarkNativeAsOptional("IsHalloween");
 }
 #endif
 
