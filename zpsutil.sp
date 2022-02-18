@@ -363,6 +363,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("IsInPanic",                   Native_IsInPanic);
     CreateNative("IsAwayFromKeyBoard",          Native_IsAFK);
     CreateNative("HasNamedPlayerItem",          Native_HasNamedPlayerItem);
+    CreateNative("IsHalloween",                 Native_IsHalloween);
+    CreateNative("IsChristmas",                 Native_IsChristmas);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -2152,6 +2154,57 @@ public any Native_IsMuted(Handle plugin, int params)
     if(hSDKCall != null)
     {
         return SDKCall(hSDKCall, client);
+    }
+    return 0;
+}
+
+public any Native_IsChristmas(Handle plugin, int params)
+{
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Static);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "ZPSUTILS_IsChristmas");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for ZPSUTILS_IsChristmas. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall);
+    }
+    return 0;
+}
+public any Native_IsHalloween(Handle plugin, int params)
+{
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Static);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "ZPSUTILS_IsHalloween");
+        PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for ZPSUTILS_IsHalloween. Update your gamedata!");
+            return 0;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall);
     }
     return 0;
 }

@@ -119,6 +119,7 @@ native void SetPlayerArmor(int client, int armor);
 native void SetPlayerArmour(int client, int armour);
 native void AddPlayerWeight(int client, float weight);
 native void RemovePlayerWeight(int client, float weight);
+native void DropAllWeapons(int client);
 
 // This function internally makes all the function calls required
 // to make the player properly escape. Eg. Drop Weapons, Armor, Stop any pending infection etc.
@@ -154,11 +155,6 @@ native void SetEntityMaxHealth(int entity, int maxhp);
 native int GetEntityMaxHealth(int entity);
 
 
-
-native void SendPhoneMessageLocation(const char[] szMessage, float vecPos[3], bool bUnknown, bool bPlaySound = true);
-native void SendPhoneMessage(const char[] szMessage, bool bPlaySound = true);
-native void SendPhoneMessageToPlayer(int client, const char[] szMessage);
-
 // Sets the current round time.
 // Time is in seconds.
 // SetRoundTime internally adds GetGameTime to the value specified
@@ -172,6 +168,11 @@ native void SetHandsPushForce(float flForce);
 native void SetZombieArmsPushForce(float flForce);
 native void SetCarrierArmsPushForce(float flForce);
 native void SetFreeForAll(bool bEnable);
+native void CleanupMap();
+native void SetIntermission(bool bState);
+native void SendPhoneMessageLocation(const char[] szMessage, float vecPos[3], bool bUnknown, bool bPlaySound = true);
+native void SendPhoneMessage(const char[] szMessage, bool bPlaySound = true);
+native void SendPhoneMessageToPlayer(int client, const char[] szMessage);
 
 native float GetRoundRemainingTime();
 // 1.0 being default
@@ -187,10 +188,6 @@ native int GetRandomTeamPlayer(int iTeamIndex, bool bAlive);
 native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
 native int GetZombieLives();
-
-native void CleanupMap();
-native void SetIntermission(bool bState);
-native void DropAllWeapons(int client);
 
 native int GetRandomPlayer(bool bAlive);
 // Given a client returns the best carrier that is currently using roar.
@@ -217,6 +214,9 @@ native float GetMeleeWeaponRange(int weapon);
 native int CreateFragGrenade(float Pos[3], float Angle[3], float Velocity[3], float angularVelocity[3], int thrower, float flExplodeTime, bool bUnknown1, bool bUnknown2);
 
 native void DetonateGrenade(int grenade);
+
+native bool IsChristmas();
+native bool IsHalloween();
 
 
 public SharedPlugin __pl_zpsutil = 
