@@ -11,43 +11,43 @@
             }
             "CWeaponZPBase::IsMeleeWeapon"
             {
-                "linux"     "391"
+                "linux"     "383"
             }
             "CWeaponZPBase::GetWeaponDamage"
             {
-                "linux"     "395"
+                "linux"     "387"
             }
             "CWeaponZPBase::WeaponWeight"
             {
-                "linux"     "396"
+                "linux"     "388"
             }
             "CBaseCombatWeapon::IsDualSlot"
             {
-                "linux"     "258"
+                "linux"     "255"
             }
             "CBaseCombatWeapon::GetMaxClip1"
             {
-                "linux"     "332"
+                "linux"     "327"
             }
             "CWeaponMeleeBase::GetRange"
             {
-                "linux"     "401"
+                "linux"     "393"
             }
             "CBaseWeapon_Health::GiveHealth_Primary"
             {
-                "linux"     "404"
+                "linux"     "396"
             }
             "CBaseWeapon_Health::GiveHealth_Secondary"
             {
-                "linux"     "405"
+                "linux"     "397"
             }
             "CBaseWeapon_Health::ExecuteAction"
             {
-                "linux"     "408"
+                "linux"     "400"
             }
             "CBaseGrenade::Detonate"
             {
-                "linux"     "240"
+                "linux"     "237"
             }
         }
         "Signatures"
