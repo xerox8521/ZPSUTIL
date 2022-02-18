@@ -36,8 +36,6 @@
 
 GameData g_pGameConfig = null;
 
-DynamicHook dhHandleJoinTeam = null;
-DynamicHook dhVoiceMenu = null;
 DynamicHook dhHealthPrimary = null;
 DynamicHook dhHealthSecondary = null;
 DynamicHook dhHealthExecuteAction = null;
@@ -50,6 +48,9 @@ DynamicDetour ddOnPlayerWeaponPickup = null;
 DynamicDetour ddOnRoundStart = null;
 DynamicDetour ddOnEscapeByTrigger = null;
 DynamicDetour ddOnCheckEmitReasonablePhysicsSpew = null;
+DynamicDetour ddOnIncrementArmorValue = null;
+DynamicDetour ddHandleJoinTeam = null;
+DynamicDetour ddVoiceMenu = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
@@ -65,6 +66,7 @@ GlobalForward gfHealthExecuteAction = null;
 GlobalForward gfEscapeByTrigger = null;
 GlobalForward gfCaptureStart = null;
 GlobalForward gfCaptured = null;
+GlobalForward gfIncrementArmorValue = null;
 
 
 ConVar sm_zps_util_colored_tags = null;
@@ -101,21 +103,13 @@ public void OnPluginStart()
     }
 
     IsLinux = (g_pGameConfig.GetOffset("OS") == 1);
-    
-    dhHandleJoinTeam = DynamicHook.FromConf(g_pGameConfig, "OnPlayerJoinTeam");
-    if(dhHandleJoinTeam == null)
+
+    if(!IsLinux)
     {
-        SetFailState("Failed to setup OnPlayerJoinTeam hook. Update your Gamedata!");
+        SetFailState("This Utility Plugin is only supported on Linux!");
         return;
     }
-    
-    dhVoiceMenu = DynamicHook.FromConf(g_pGameConfig, "OnPlayerVoiceMenu");
-    if(dhVoiceMenu == null)
-    {
-        SetFailState("Failed to setup OnPlayerVoiceMenu hook. Update your Gamedata!");
-        return;
-    }
-    
+
     dhHealthPrimary = DynamicHook.FromConf(g_pGameConfig, "OnGiveHealthPrimary");
     if(dhHealthPrimary == null)
     {
@@ -135,6 +129,24 @@ public void OnPluginStart()
         SetFailState("Failed to setup OnExecuteAction hook. Update your Gamedata!");
         return;
     }
+    
+    ddHandleJoinTeam = DynamicDetour.FromConf(g_pGameConfig, "OnPlayerJoinTeam");
+    if(ddHandleJoinTeam == null)
+    {
+        SetFailState("Failed to setup OnPlayerJoinTeam detour. Update your Gamedata!");
+        return;
+    }
+
+    ddHandleJoinTeam.Enable(Hook_Post, Hook_OnPlayerJoinTeam);
+    
+    ddVoiceMenu = DynamicDetour.FromConf(g_pGameConfig, "OnPlayerVoiceMenu");
+    if(ddVoiceMenu == null)
+    {
+        SetFailState("Failed to setup OnPlayerVoiceMenu hook. Update your Gamedata!");
+        return;
+    }
+
+    ddVoiceMenu.Enable(Hook_Post, Hook_OnPlayerVoiceText);
     
     ddOnGiveAmmoToPlayer = DynamicDetour.FromConf(g_pGameConfig, "OnGiveAmmoToPlayer");
     if(ddOnGiveAmmoToPlayer == null)
@@ -208,7 +220,13 @@ public void OnPluginStart()
     }
     ddOnCheckEmitReasonablePhysicsSpew.Enable(Hook_Post, Hook_OnCheckEmitReasonablePhysicsSpew);
 
-    HookEvent("endslate", Event_RoundEnd);
+    ddOnIncrementArmorValue = DynamicDetour.FromConf(g_pGameConfig, "OnIncrementArmorValue");
+    if(ddOnIncrementArmorValue == null)
+    {
+        SetFailState("Failed to setup OnIncrementArmorValue detour. Update your Gamedata!");
+        return;
+    }
+    ddOnIncrementArmorValue.Enable(Hook_Pre, Hook_OnIncrementArmorValue);
 
 
 
@@ -222,11 +240,6 @@ public void OnPluginStart()
         if(!IsClientInGame(i)) continue;
         OnClientPutInServer(i);
     }
-
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureStart", OnCaptureStart);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureStart", OnCaptureStart);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureCompleted", OnCaptureEnd);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureCompleted", OnCaptureEnd);
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -249,6 +262,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     gfRoundStart = CreateGlobalForward("OnRoundStart", ET_Ignore);
     gfRoundEnd = CreateGlobalForward("OnRoundEnd", ET_Ignore, Param_Cell);
+
+    gfIncrementArmorValue = CreateGlobalForward("OnIncrementArmorValue", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
 
     CreateNative("IsCarrier",                   Native_IsCarrier);
     CreateNative("IsInfected",                  Native_IsInfected);
@@ -322,6 +337,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("SetIntermission",             Native_SetIntermission);
     CreateNative("IsInPanic",                   Native_IsInPanic);
     CreateNative("IsAwayFromKeyBoard",          Native_IsAFK);
+    CreateNative("HasNamedPlayerItem",          Native_HasNamedPlayerItem);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -330,9 +346,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnClientPutInServer(int client)
 {
-    dhHandleJoinTeam.HookEntity(Hook_Pre, client, Hook_OnPlayerJoinTeam);
-    dhVoiceMenu.HookEntity(Hook_Post, client, Hook_OnPlayerVoiceText);
-
     bModifiedChat[client] = false;
 }
 
@@ -450,6 +463,20 @@ public MRESReturn Hook_OnCheckEmitReasonablePhysicsSpew(DHookReturn hReturn)
     return MRES_Supercede;
 }
 
+public MRESReturn Hook_OnIncrementArmorValue(int pThis, DHookParam hParam)
+{
+    int nMaxValue = hParam.Get(3);
+    Call_StartForward(gfIncrementArmorValue);
+    Call_PushCell(hParam.Get(1));
+    Call_PushCellRef(nMaxValue);
+    Action result = Plugin_Continue;
+    Call_Finish(result);
+    if(result == Plugin_Changed)
+    {
+        hParam.Set(3, nMaxValue);
+    }
+    return MRES_ChangedHandled;
+}
 public MRESReturn Hook_OnEscapeByTrigger(int pThis, DHookParam hParam)
 {
     if(hParam.IsNull(1))
@@ -1854,10 +1881,6 @@ public any Native_DetonateGrenade(Handle plugin, int params)
 }
 public any Native_CleanupMap(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {
@@ -1879,10 +1902,6 @@ public any Native_CleanupMap(Handle plugin, int params)
 
 public any Native_GetRandomPlayer(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {
@@ -1906,10 +1925,6 @@ public any Native_GetRandomPlayer(Handle plugin, int params)
 
 public any Native_GetBestRoaringCarrier(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
     int client = GetNativeCell(1);
     if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
     if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
@@ -1937,11 +1952,6 @@ public any Native_GetBestRoaringCarrier(Handle plugin, int params)
 
 public any Native_IsInTestMode(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {
@@ -1964,11 +1974,6 @@ public any Native_IsInTestMode(Handle plugin, int params)
 
 public any Native_IsRoundOngoing(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {
@@ -1992,11 +1997,6 @@ public any Native_IsRoundOngoing(Handle plugin, int params)
 
 public any Native_IsWarmup(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {
@@ -2019,11 +2019,6 @@ public any Native_IsWarmup(Handle plugin, int params)
 
 public any Native_SetIntermission(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {
@@ -2046,11 +2041,6 @@ public any Native_SetIntermission(Handle plugin, int params)
 
 public any Native_DropAllWeapons(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     int client = GetNativeCell(1);
     if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
     if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
@@ -2076,11 +2066,6 @@ public any Native_DropAllWeapons(Handle plugin, int params)
 
 public any Native_IsAFK(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     int client = GetNativeCell(1);
     if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
     if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
@@ -2107,11 +2092,6 @@ public any Native_IsAFK(Handle plugin, int params)
 
 public any Native_IsGagged(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     int client = GetNativeCell(1);
     if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
     if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
@@ -2138,11 +2118,6 @@ public any Native_IsGagged(Handle plugin, int params)
 
 public any Native_IsMuted(Handle plugin, int params)
 {
-    if(!IsLinux)
-    {
-        return ThrowNativeError(SP_ERROR_NATIVE, "Native only supported on linux");
-    }
-
     int client = GetNativeCell(1);
     if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
     if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
@@ -2165,6 +2140,39 @@ public any Native_IsMuted(Handle plugin, int params)
         return SDKCall(hSDKCall, client);
     }
     return 0;
+}
+
+public any Native_HasNamedPlayerItem(Handle plugin, int params)
+{
+
+    int client = GetNativeCell(1);
+    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
+    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
+
+    int length;
+    GetNativeStringLength(2, length);
+    char[] szClassName = new char[length+2];
+    GetNativeString(2, szClassName, length+1);
+
+    static Handle hSDKCall = null;
+    if(hSDKCall == null)
+    {
+        StartPrepSDKCall(SDKCall_Player);
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CBasePlayer::HasNamedPlayerItem");
+        PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+        PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+        hSDKCall = EndPrepSDKCall();
+        if(hSDKCall == null)
+        {
+            ThrowNativeError(SP_ERROR_NATIVE, "Failed to setup SDKCall for CBasePlayer::HasNamedPlayerItem. Update your gamedata!");
+            return INVALID_ENT_REFERENCE;
+        }
+    }
+    if(hSDKCall != null)
+    {
+        return SDKCall(hSDKCall, client, szClassName);
+    }
+    return INVALID_ENT_REFERENCE;
 }
 
 public any Native_IsInPanic(Handle plugin, int params)

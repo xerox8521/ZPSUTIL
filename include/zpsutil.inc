@@ -70,6 +70,11 @@ forward Action OnInoculatorGiveHealthSecondary(int inoculator, int owner, int &h
 // Return Plugin_Handled to prevent the inoculator to perform the action.
 forward Action OnInoculatorExecuteAction(int inoculator, int owner, int target, bool bPrimary);
 
+// Called when a player picks up item_armor.
+// You can modifiy nMaxCount to allow the player to pickup more than 100 Armor.
+// This is NOT called by SetPlayerArmor!
+forward Action OnIncrementArmorValue(int client, int nCount, int &nMaxCount);
+
 
 forward void OnRoundStart();
 // See the WINNER_ enumeration for possible values.
@@ -92,6 +97,14 @@ native bool IsBerzerking(int client);
 native bool PlayerHasAmmoType(int client, AmmoType ammoType);
 native bool PlayerHasActiveIED(int client);
 native bool PlayerHasDeliveryItem(int client);
+native bool IsInPanic(int client);
+native bool IsAwayFromKeyboard(int client);
+// This is only for the BUILD IN Gagging system.
+// This has NOTHING to do with sourcemods sm_gag command!!
+native bool IsGagged(int client);
+// This is only for the BUILD IN Mute system.
+// This has NOTHING to do with sourcemods sm_mute command!!
+native bool IsMuted(int client);
 
 native float GetFlashBattery(int client);
 native float SetFlashBattery(int client, float battery);
@@ -106,9 +119,11 @@ native void SetPlayerArmor(int client, int armor);
 native void SetPlayerArmour(int client, int armour);
 native void AddPlayerWeight(int client, float weight);
 native void RemovePlayerWeight(int client, float weight);
+
 // This function internally makes all the function calls required
 // to make the player properly escape. Eg. Drop Weapons, Armor, Stop any pending infection etc.
 native void SetPlayerEscaped(int client, bool bToObserver = true, bool bPlaySound = true);
+
 // Player needs to have "Allow servers to open my Steam overlay to web pages" or cl_allow_servers_to_use_steam_overlay 1
 // Can be enabled in ZP!S Options -> Custom Content otherwise this does nothing.
 native void OpenSteamOverlay(int client, const char[] szURL);
@@ -128,6 +143,10 @@ native void RemoveCosmeticWear(int client, const char[] szModelName);
 native int GivePlayerWeapon(int client, const char[] szWeaponName);
 native int GetRemainingInvSlots(int client);
 native int GetActiveWeapon(int client);
+
+// Checks if the player has the given weapon name in their inventory.
+// Returns the weapons entity index or -1 on failure / player not having the weapon.
+native int HasPlayerNamedItem(int client, const char[] szClassName);
 
 
 // Also works on players.
@@ -169,8 +188,6 @@ native int GetRandomCarrier(bool bAlive);
 native int GetWinCount(bool Survivors); // Confirm the bool meaning
 native int GetZombieLives();
 
-// LINUX ONLY FUNCTIONS START
-
 native void CleanupMap();
 native void SetIntermission(bool bState);
 native void DropAllWeapons(int client);
@@ -182,17 +199,7 @@ native int GetBestRoaringCarrier(int client);
 native bool IsInTestMode();
 native bool IsWarmup();
 native bool IsRoundOngoing(bool bIncludeTestMode = false);
-native bool IsInPanic(int client);
-native bool IsAwayFromKeyboard(int client);
-// This is only for the BUILD IN Gagging system.
-// This has NOTHING to do with sourcemods sm_gag command!!
-native bool IsGagged(int client);
-// This is only for the BUILD IN Mute system.
-// This has NOTHING to do with sourcemods sm_mute command!!
-native bool IsMuted(int client);
 
-
-// LINUX ONLY FUNCTIONS END
 
 native int GetWeaponOwner(int weapon);
 native int GetPrimaryAmmoType(int weapon);

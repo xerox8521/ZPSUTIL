@@ -9,26 +9,6 @@
                 "linux"     "1"
                 "windows"   "2"
             }
-            "CZP_Player::HandleCommand_JoinTeam"
-            {
-                "linux"     "501"
-            }
-            "CZP_Player::VoiceMenu"
-            {
-                "linux"     "504"
-            }
-            "CZP_Player::VoiceMenuText"
-            {
-                "linux"     "505"
-            }
-            "CZP_Player::SetInfection"
-            {
-                "linux"     "513"
-            }
-            "CZP_Player::SetInfectionResistance"
-            {
-                "linux"     "514"
-            }
             "CWeaponZPBase::IsMeleeWeapon"
             {
                 "linux"     "391"
@@ -72,6 +52,36 @@
         }
         "Signatures"
         {
+            "CZP_Player::SetInfection"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player12SetInfectionEbbi"
+            }
+            "CZP_Player::SetInfectionResistance"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player22SetInfectionResistanceEif"
+            }
+            "CZP_Player::SetInfection"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player22SetInfectionResistanceEif"
+            }
+            "CZP_Player::VoiceMenu"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player9VoiceMenuEPKcS1_"
+            }
+            "CZP_Player::VoiceMenuText"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player13VoiceMenuTextEPKc"
+            }
+            "CZP_Player::HandleCommand_JoinTeam"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player22HandleCommand_JoinTeamEi"
+            }
             "CZP_Player::DropWeapon"
             {
                 "library"   "server"
@@ -258,9 +268,34 @@
                 "linux"     "@_Z30CheckEmitReasonablePhysicsSpewv"
                 "windows"   "\xFF\x15\x2A\x2A\x2A\x2A\xDD\x05\x2A\x2A\x2A\x2A\xD9\xC9"
             }
+            "CBasePlayer::IncrementArmorValue"
+            {
+                "library"   "server"
+                "linux"     "@_ZN11CBasePlayer19IncrementArmorValueEii"
+            }
         }
         "Functions"
         {
+            "OnIncrementArmorValue"
+            {
+                "signature" "CBasePlayer::IncrementArmorValue"
+                "callconv"  "thiscall"
+                "return"    "void"
+                "this"      "entity"
+                {
+                    "arguments"
+                    {
+                        "nCount"
+                        {
+                            "type"  "int"
+                        }
+                        "nMaxValue"
+                        {
+                            "type"  "int"
+                        }
+                    }
+                }
+            }
             "OnCheckEmitReasonablePhysicsSpew"
             {
                 "signature" "CheckEmitReasonablePhysicsSpew"
@@ -398,7 +433,7 @@
             }
             "OnPlayerJoinTeam"
             {
-                "offset"    "CZP_Player::HandleCommand_JoinTeam"
+                "signature" "CZP_Player::HandleCommand_JoinTeam"
                 "hooktype"  "entity"
                 "callconv"  "thiscall"
                 "return"    "bool"
@@ -413,7 +448,7 @@
             }
             "OnPlayerVoiceMenu"
             {
-                "offset"    "CZP_Player::VoiceMenu"
+                "signature" "CZP_Player::VoiceMenu"
                 "hooktype"  "entity"
                 "callconv"  "thiscall"
                 "return"    "void"
@@ -432,7 +467,7 @@
             }
             "OnPlayerVoiceMenuText"
             {
-                "offset"    "CZP_Player::VoiceMenuText"
+                "signature" "CZP_Player::VoiceMenuText"
                 "hooktype"  "entity"
                 "callconv"  "thiscall"
                 "return"    "void"
