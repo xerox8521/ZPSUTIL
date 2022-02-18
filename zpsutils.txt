@@ -273,9 +273,30 @@
                 "library"   "server"
                 "linux"     "@_ZN11CBasePlayer19IncrementArmorValueEii"
             }
+            "CZombiePanic::CallInfoText"
+            {
+                "library"   "server"
+                "linux"     "@_ZN12CZombiePanic12CallInfoTextE13RoundWinState"
+            }
         }
         "Functions"
         {
+            "OnRoundEnd"
+            {
+                "signature" "CZombiePanic::CallInfoText"
+                "callconv"  "thiscall"
+                "return"    "void"
+                "this"      "ignore"
+                {
+                    "arguments"
+                    {
+                        "iWinner"
+                        {
+                            "type"  "int"
+                        }
+                    }
+                }
+            }
             "OnIncrementArmorValue"
             {
                 "signature" "CBasePlayer::IncrementArmorValue"

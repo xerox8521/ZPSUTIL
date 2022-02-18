@@ -29,10 +29,21 @@
 
 #define GRENADE_MODEL "models/weapons/w_grenade_thrown.mdl"
 
-#define TEAM_LOBBY 0
-#define TEAM_SPECTATOR 1
-#define TEAM_SURVIVOR 2
-#define TEAM_ZOMBIE 3
+enum 
+{
+    TEAM_LOBBY = 0,
+    TEAM_SPECTATOR = 1,
+    TEAM_SURVIVOR,
+    TEAM_ZOMBIE 
+}
+
+enum 
+{
+    WINNER_SURVIVORS = 1,
+    WINNER_ZOMBIES,
+    WINNER_STALEMATE
+}
+
 
 GameData g_pGameConfig = null;
 
@@ -51,6 +62,7 @@ DynamicDetour ddOnCheckEmitReasonablePhysicsSpew = null;
 DynamicDetour ddOnIncrementArmorValue = null;
 DynamicDetour ddHandleJoinTeam = null;
 DynamicDetour ddVoiceMenu = null;
+DynamicDetour ddOnRoundEnd = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
@@ -227,6 +239,19 @@ public void OnPluginStart()
         return;
     }
     ddOnIncrementArmorValue.Enable(Hook_Pre, Hook_OnIncrementArmorValue);
+    
+    ddOnRoundEnd = DynamicDetour.FromConf(g_pGameConfig, "OnRoundEnd");
+    if(ddOnRoundEnd == null)
+    {
+        SetFailState("Failed to setup OnRoundEnd detour. Update your Gamedata!");
+        return;
+    }
+    ddOnRoundEnd.Enable(Hook_Post, Hook_OnRoundEnd);
+
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureStart", OnCaptureStart);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureStart", OnCaptureStart);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureCompleted", OnCaptureEnd);
+    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureCompleted", OnCaptureEnd);
 
 
 
@@ -432,30 +457,6 @@ public Action t_ResetModifiedChat(Handle timer, any serial)
     return Plugin_Continue;
 }
 
-public void Event_RoundEnd(Event event, const char[] szName, bool dontBroadcast)
-{
-    char win_text[32];
-    event.GetString("win_text", win_text, sizeof(win_text));
-
-    int winner = 0;
-    if(StrEqual(win_text, "human"))
-    {
-        winner = 1;
-    }
-    else if(StrEqual(win_text, "zombie"))
-    {
-        winner = 2;
-    }
-    else if(StrEqual(win_text, "stalemate"))
-    {
-        winner = 3;
-    }
-
-    Call_StartForward(gfRoundEnd);
-    Call_PushCell(winner);
-    Call_Finish();
-}
-
 
 public MRESReturn Hook_OnCheckEmitReasonablePhysicsSpew(DHookReturn hReturn)
 {
@@ -463,6 +464,18 @@ public MRESReturn Hook_OnCheckEmitReasonablePhysicsSpew(DHookReturn hReturn)
     return MRES_Supercede;
 }
 
+public MRESReturn Hook_OnRoundEnd(DHookParam hParam)
+{
+    int winner = hParam.Get(1);
+    if(winner != WINNER_SURVIVORS && winner != WINNER_ZOMBIES)
+    {
+        winner = WINNER_STALEMATE;
+    }
+    Call_StartForward(gfRoundEnd);
+    Call_PushCell(winner);
+    Call_Finish();
+    return MRES_Ignored;
+}
 public MRESReturn Hook_OnIncrementArmorValue(int pThis, DHookParam hParam)
 {
     int nMaxValue = hParam.Get(2);
