@@ -365,7 +365,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("HasNamedPlayerItem",          Native_HasNamedPlayerItem);
     CreateNative("IsHalloween",                 Native_IsHalloween);
     CreateNative("IsChristmas",                 Native_IsChristmas);
-    CreateNative("StripColors",                 Native_StripColors;
+    CreateNative("StripColors",                 Native_StripColors);
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
