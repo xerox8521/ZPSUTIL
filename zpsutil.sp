@@ -806,7 +806,7 @@ void StripColors(const char[] szMessage, char[] szBuffer, int maxlength)
 public any Native_StripColors(Handle plugin, int params)
 {
     int length;
-    GetNativeStringLength(1);
+    GetNativeStringLength(1, length);
 
     char[] szMessage = new char[length+2];
     GetNativeString(1, szMessage, length+1);
