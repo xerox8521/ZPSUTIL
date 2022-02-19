@@ -217,6 +217,7 @@ native void DetonateGrenade(int grenade);
 native bool IsChristmas();
 native bool IsHalloween();
 
+native void StripColors(const char[] szMsg, char[] szBuffer, int maxlength);
 
 public SharedPlugin __pl_zpsutil = 
 {
@@ -312,6 +313,7 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("GetMeleeWeaponRange");
    MarkNativeAsOptional("IsChristmas");
    MarkNativeAsOptional("IsHalloween");
+   MarkNativeAsOptional("StripColors");
 }
 #endif
 

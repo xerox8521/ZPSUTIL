@@ -92,7 +92,7 @@ public Plugin myinfo =
 {
     name = "[ZPS] Utils Linux Only",
     author = "XeroX",
-    description = "Provides various utilties for Zombie Panic! Source",
+    description = "Provides various utilities for Zombie Panic! Source Plugin Developers",
     version = PLUGIN_VERSION,
     url = ""
 };
@@ -173,7 +173,7 @@ public void OnPluginStart()
         SetFailState("Failed to setup OnCheckAFK detour. Update your Gamedata!");
         return;
     }
-    ddOnCheckAFK.Enable(Hook_Post, Hook_OnCheckAFK);
+    ddOnCheckAFK.Enable(Hook_Pre, Hook_OnCheckAFK);
 
     ddOnGetSpeed = DynamicDetour.FromConf(g_pGameConfig, "OnGetSpeed");
     if(ddOnGetSpeed == null)
@@ -365,6 +365,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("HasNamedPlayerItem",          Native_HasNamedPlayerItem);
     CreateNative("IsHalloween",                 Native_IsHalloween);
     CreateNative("IsChristmas",                 Native_IsChristmas);
+    CreateNative("StripColors",                 Native_StripColors;
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
@@ -378,38 +379,44 @@ public void OnClientPutInServer(int client)
 
 public void OnCaptureEnd(const char[] output, int caller, int activator, float delay)
 {
-    int teamindex = TEAM_LOBBY;
-    if(StrEqual(output, "m_OnZombieCaptureCompleted"))
+    if(gfCaptured.FunctionCount > 0)
     {
-        teamindex = TEAM_ZOMBIE;
-    }
-    else if(StrEqual(output, "m_OnHumanCaptureCompleted"))
-    {
-        teamindex = TEAM_SURVIVOR;
-    }
+        int teamindex = TEAM_LOBBY;
+        if(StrEqual(output, "m_OnZombieCaptureCompleted"))
+        {
+            teamindex = TEAM_ZOMBIE;
+        }
+        else if(StrEqual(output, "m_OnHumanCaptureCompleted"))
+        {
+            teamindex = TEAM_SURVIVOR;
+        }
 
-    Call_StartForward(gfCaptured);
-    Call_PushCell(caller);
-    Call_PushCell(teamindex);
-    Call_Finish();
+        Call_StartForward(gfCaptured);
+        Call_PushCell(caller);
+        Call_PushCell(teamindex);
+        Call_Finish();
+    }  
 }
 
 public void OnCaptureStart(const char[] output, int caller, int activator, float delay)
 {
-    int teamindex = TEAM_LOBBY;
-    if(StrEqual(output, "m_OnZombieCaptureStart"))
+    if(gfCaptureStart.FunctionCount > 0)
     {
-        teamindex = TEAM_ZOMBIE;
-    }
-    else if(StrEqual(output, "m_OnHumanCaptureStart"))
-    {
-        teamindex = TEAM_SURVIVOR;
-    }
+        int teamindex = TEAM_LOBBY;
+        if(StrEqual(output, "m_OnZombieCaptureStart"))
+        {
+            teamindex = TEAM_ZOMBIE;
+        }
+        else if(StrEqual(output, "m_OnHumanCaptureStart"))
+        {
+            teamindex = TEAM_SURVIVOR;
+        }
 
-    Call_StartForward(gfCaptureStart);
-    Call_PushCell(caller);
-    Call_PushCell(teamindex);
-    Call_Finish();
+        Call_StartForward(gfCaptureStart);
+        Call_PushCell(caller);
+        Call_PushCell(teamindex);
+        Call_Finish();
+    }   
 }
 
 public void OnEntityCreated(int entity, const char[] szClassName)
@@ -468,211 +475,249 @@ public MRESReturn Hook_OnCheckEmitReasonablePhysicsSpew(DHookReturn hReturn)
 
 public MRESReturn Hook_OnRoundEnd(DHookParam hParam)
 {
-    int winner = hParam.Get(1);
-    if(winner != WINNER_SURVIVORS && winner != WINNER_ZOMBIES)
+    if(gfRoundEnd.FunctionCount > 0)
     {
-        winner = WINNER_STALEMATE;
+        int winner = hParam.Get(1);
+        if(winner != WINNER_SURVIVORS && winner != WINNER_ZOMBIES)
+        {
+            winner = WINNER_STALEMATE;
+        }
+        Call_StartForward(gfRoundEnd);
+        Call_PushCell(winner);
+        Call_Finish();
     }
-    Call_StartForward(gfRoundEnd);
-    Call_PushCell(winner);
-    Call_Finish();
+    
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnIncrementArmorValue(int pThis, DHookParam hParam)
 {
-    int nMaxValue = hParam.Get(2);
-    Call_StartForward(gfIncrementArmorValue);
-    Call_PushCell(pThis);
-    Call_PushCell(hParam.Get(1));
-    Call_PushCellRef(nMaxValue);
-    Action result = Plugin_Continue;
-    Call_Finish(result);
-    if(result == Plugin_Changed)
+    if(gfIncrementArmorValue.FunctionCount > 0)
     {
-        hParam.Set(2, nMaxValue);
+        int nMaxValue = hParam.Get(2);
+        Call_StartForward(gfIncrementArmorValue);
+        Call_PushCell(pThis);
+        Call_PushCell(hParam.Get(1));
+        Call_PushCellRef(nMaxValue);
+        Action result = Plugin_Continue;
+        Call_Finish(result);
+        if(result == Plugin_Changed)
+        {
+            hParam.Set(2, nMaxValue);
+            return MRES_ChangedHandled;
+        }
     }
-    return MRES_ChangedHandled;
+    return MRES_Ignored;
 }
 public MRESReturn Hook_OnEscapeByTrigger(int pThis, DHookParam hParam)
 {
-    if(hParam.IsNull(1))
+    if(gfEscapeByTrigger.FunctionCount > 0)
+    {
+        if(hParam.IsNull(1))
         return MRES_Ignored;
     
-    int client = hParam.Get(1);
-    bool bSendMessage = hParam.Get(2);
+        int client = hParam.Get(1);
+        bool bSendMessage = hParam.Get(2);
 
-    Call_StartForward(gfEscapeByTrigger);
-    Call_PushCell(pThis);
-    Call_PushCell(client);
-    Call_PushCell(bSendMessage);
-    Call_Finish();
-
+        Call_StartForward(gfEscapeByTrigger);
+        Call_PushCell(pThis);
+        Call_PushCell(client);
+        Call_PushCell(bSendMessage);
+        Call_Finish();
+    }
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnGiveHealthPrimary(int pThis, DHookReturn hReturn)
 {
-    int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
-    int health = hReturn.Value;
-    
-    Action result = Plugin_Continue;
-    Call_StartForward(gfHealthPrimary);
-    Call_PushCell(pThis);
-    Call_PushCell(owner);
-    Call_PushCellRef(health);
-    Call_Finish(result);
-
-    if(result == Plugin_Changed)
+    if(gfHealthPrimary.FunctionCount > 0)
     {
-        hReturn.Value = health;
-        return MRES_Supercede;
+        int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
+        int health = hReturn.Value;
+        
+        Action result = Plugin_Continue;
+        Call_StartForward(gfHealthPrimary);
+        Call_PushCell(pThis);
+        Call_PushCell(owner);
+        Call_PushCellRef(health);
+        Call_Finish(result);
+
+        if(result == Plugin_Changed)
+        {
+            hReturn.Value = health;
+            return MRES_Supercede;
+        }
     }
     return MRES_Ignored;
 }
 
 public MRESReturn Hook_OnGiveHealthSecondary(int pThis, DHookReturn hReturn)
 {
-    int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
-    int health = hReturn.Value;
-
-    Action result = Plugin_Continue;
-    Call_StartForward(gfHealthSecondary);
-    Call_PushCell(pThis);
-    Call_PushCell(owner);
-    Call_PushCellRef(health);
-    Call_Finish(result);
-
-    if(result == Plugin_Changed)
+    if(gfHealthSecondary.FunctionCount > 0)
     {
-        hReturn.Value = health;
-        return MRES_Supercede;
+        int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
+        int health = hReturn.Value;
+
+        Action result = Plugin_Continue;
+        Call_StartForward(gfHealthSecondary);
+        Call_PushCell(pThis);
+        Call_PushCell(owner);
+        Call_PushCellRef(health);
+        Call_Finish(result);
+
+        if(result == Plugin_Changed)
+        {
+            hReturn.Value = health;
+            return MRES_Supercede;
+        }
     }
     return MRES_Ignored;
 }
 
 public MRESReturn Hook_OnExecuteAction(int pThis, DHookParam hParams)
 {
-    if(hParams.IsNull(1))
+    if(gfHealthExecuteAction.FunctionCount > 0)
+    {
+        if(hParams.IsNull(1))
         return MRES_Ignored;
 
-    int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
-    int target = hParams.Get(1);
-    bool bPrimary = hParams.Get(2);
+        int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
+        int target = hParams.Get(1);
+        bool bPrimary = hParams.Get(2);
 
 
-    Action result = Plugin_Continue;
-    Call_StartForward(gfHealthExecuteAction);
-    Call_PushCell(pThis);
-    Call_PushCell(owner);
-    Call_PushCell(target);
-    Call_PushCell(bPrimary);
-    Call_Finish(result);
+        Action result = Plugin_Continue;
+        Call_StartForward(gfHealthExecuteAction);
+        Call_PushCell(pThis);
+        Call_PushCell(owner);
+        Call_PushCell(target);
+        Call_PushCell(bPrimary);
+        Call_Finish(result);
 
-    if(result == Plugin_Handled)
-    {
-        return MRES_Supercede;
+        if(result == Plugin_Handled)
+        {
+            return MRES_Supercede;
+        }
     }
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnRoundStart()
 {
-    Call_StartForward(gfRoundStart);
-    Call_Finish();
+    if(gfRoundStart.FunctionCount > 0)
+    {
+        Call_StartForward(gfRoundStart);
+        Call_Finish();
+    }
+    
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnPlayerWeaponPickup(int pThis, DHookParam hParams)
 {
-    if(!hParams.IsNull(1))
+    if(gfPlayerWeaponPickup.FunctionCount > 0)
     {
-        int weapon = hParams.Get(1);
-        bool bUnknown = hParams.Get(2);
-        int inventorySlot = hParams.Get(3);
-        bool bForcePickup = hParams.Get(4);
-
-        char szClassName[32];
-        GetEntityClassname(weapon, szClassName, sizeof(szClassName));
-
-        Action result = Plugin_Continue;
-
-        Call_StartForward(gfPlayerWeaponPickup);
-        Call_PushCell(pThis);
-        Call_PushCell(weapon);
-        Call_PushString(szClassName);
-        Call_PushCell(bUnknown);
-        Call_PushCell(inventorySlot);
-        Call_PushCell(bForcePickup);
-        Call_Finish(result);
-
-        if(result == Plugin_Handled)
+        if(!hParams.IsNull(1))
         {
-            return MRES_Supercede;
+            int weapon = hParams.Get(1);
+            bool bUnknown = hParams.Get(2);
+            int inventorySlot = hParams.Get(3);
+            bool bForcePickup = hParams.Get(4);
+
+            char szClassName[32];
+            GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+
+            Action result = Plugin_Continue;
+
+            Call_StartForward(gfPlayerWeaponPickup);
+            Call_PushCell(pThis);
+            Call_PushCell(weapon);
+            Call_PushString(szClassName);
+            Call_PushCell(bUnknown);
+            Call_PushCell(inventorySlot);
+            Call_PushCell(bForcePickup);
+            Call_Finish(result);
+
+            if(result == Plugin_Handled)
+            {
+                return MRES_Supercede;
+            }
         }
     }
+    
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnGiveWeaponToPlayer(int pThis, DHookParam hParams)
 {
-    if(!hParams.IsNull(1) && !hParams.IsNull(2))
+    if(gfGiveWeaponToPlayer.FunctionCount > 0)
     {
-        int receiver = hParams.Get(1);
-        int weapon = hParams.Get(2);
-
-        Action result = Plugin_Continue;
-
-        char szClassName[32];
-        GetEntityClassname(weapon, szClassName, sizeof(szClassName));
-
-        Call_StartForward(gfGiveWeaponToPlayer);
-        Call_PushCell(pThis);
-        Call_PushCell(receiver);
-        Call_PushCell(weapon);
-        Call_PushString(szClassName);
-        Call_Finish(result);
-
-        if(result == Plugin_Handled)
+        if(!hParams.IsNull(1) && !hParams.IsNull(2))
         {
-            return MRES_Supercede;
+            int receiver = hParams.Get(1);
+            int weapon = hParams.Get(2);
+
+            Action result = Plugin_Continue;
+
+            char szClassName[32];
+            GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+
+            Call_StartForward(gfGiveWeaponToPlayer);
+            Call_PushCell(pThis);
+            Call_PushCell(receiver);
+            Call_PushCell(weapon);
+            Call_PushString(szClassName);
+            Call_Finish(result);
+
+            if(result == Plugin_Handled)
+            {
+                return MRES_Supercede;
+            }
         }
     }
+    
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnGiveAmmoToPlayer(int pThis, DHookParam hParams)
 {
-    if(!hParams.IsNull(1))
+    if(gfGiveAmmoToPlayer.FunctionCount > 0)
     {
-        int receiver = hParams.Get(1);
-        Action result = Plugin_Continue;
-
-        Call_StartForward(gfGiveAmmoToPlayer);
-        Call_PushCell(pThis);
-        Call_PushCell(receiver);
-        Call_Finish(result);
-        if(result == Plugin_Handled)
+        if(!hParams.IsNull(1))
         {
-            return MRES_Supercede;
+            int receiver = hParams.Get(1);
+            Action result = Plugin_Continue;
+
+            Call_StartForward(gfGiveAmmoToPlayer);
+            Call_PushCell(pThis);
+            Call_PushCell(receiver);
+            Call_Finish(result);
+            if(result == Plugin_Handled)
+            {
+                return MRES_Supercede;
+            }
         }
     }
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnGetSpeed(int pThis, DHookReturn hReturn)
 {
-    if(!pThis)
-        return MRES_Ignored;
-    if(!IsClientInGame(pThis))
-        return MRES_Ignored;
-
-    float flSpeed = hReturn.Value;
-    
-    Action result = Plugin_Continue;
-
-    Call_StartForward(gfGetSpeed);
-    Call_PushCell(pThis);
-    Call_PushFloatRef(flSpeed);
-    Call_Finish(result);
-    if(result == Plugin_Changed)
+    if(gfGetSpeed.FunctionCount > 0)
     {
-        hReturn.Value = flSpeed;
-        return MRES_Supercede;
+        if(!pThis)
+        return MRES_Ignored;
+        if(!IsClientInGame(pThis))
+            return MRES_Ignored;
+
+        float flSpeed = hReturn.Value;
+        
+        Action result = Plugin_Continue;
+
+        Call_StartForward(gfGetSpeed);
+        Call_PushCell(pThis);
+        Call_PushFloatRef(flSpeed);
+        Call_Finish(result);
+        if(result == Plugin_Changed)
+        {
+            hReturn.Value = flSpeed;
+            return MRES_Supercede;
+        }
     }
+    
     return MRES_Ignored;
 }
 public MRESReturn Hook_OnCheckAFK(int pThis)
@@ -682,51 +727,54 @@ public MRESReturn Hook_OnCheckAFK(int pThis)
     if(!IsClientInGame(pThis))
         return MRES_Ignored;
     
-    if(sm_zps_afk_admin_immunity.BoolValue)
-    {
-        if(CheckCommandAccess(pThis, "sm_zps_afk_adm_immunity", ADMFLAG_KICK, true))
-        {
-            return MRES_Supercede;
-        }
-    }
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnPlayerVoiceText(int pThis, DHookParam hParams)
-{
-    char szInternalBuffer[64];
-    hParams.GetString(1, szInternalBuffer, sizeof(szInternalBuffer));
-
-    Call_StartForward(gfVoiceMenu);
-    Call_PushCell(pThis);
-    Call_PushString(szInternalBuffer);
-    Action result = Plugin_Continue;
-    Call_Finish(result);
-    if(result == Plugin_Handled)
+    if(sm_zps_afk_admin_immunity.BoolValue && CheckCommandAccess(pThis, "sm_zps_afk_adm_immunity", ADMFLAG_KICK, true))
     {
         return MRES_Supercede;
     }
     return MRES_Ignored;
 }
-public MRESReturn Hook_OnPlayerJoinTeam(int pThis, DHookReturn hReturn, DHookParam hParams)
+public MRESReturn Hook_OnPlayerVoiceText(int pThis, DHookParam hParams)
 {
-    int team = hParams.Get(1);
-    if(team > 0)
+    if(gfVoiceMenu.FunctionCount > 0)
     {
-        Call_StartForward(gfHandleJoinTeam);
-        Call_PushCell(pThis);
-        Call_PushCellRef(team);
+        char szInternalBuffer[64];
+        hParams.GetString(1, szInternalBuffer, sizeof(szInternalBuffer));
 
+        Call_StartForward(gfVoiceMenu);
+        Call_PushCell(pThis);
+        Call_PushString(szInternalBuffer);
         Action result = Plugin_Continue;
         Call_Finish(result);
         if(result == Plugin_Handled)
         {
-            hReturn.Value = false;
             return MRES_Supercede;
         }
-        else if(result == Plugin_Changed)
+    }
+    return MRES_Ignored;
+}
+public MRESReturn Hook_OnPlayerJoinTeam(int pThis, DHookReturn hReturn, DHookParam hParams)
+{
+    if(gfHandleJoinTeam.FunctionCount > 0)
+    {
+        int team = hParams.Get(1);
+        if(team > 0)
         {
-            hParams.Set(1, team);
-            return MRES_ChangedHandled;
+            Call_StartForward(gfHandleJoinTeam);
+            Call_PushCell(pThis);
+            Call_PushCellRef(team);
+
+            Action result = Plugin_Continue;
+            Call_Finish(result);
+            if(result == Plugin_Handled)
+            {
+                hReturn.Value = false;
+                return MRES_Supercede;
+            }
+            else if(result == Plugin_Changed)
+            {
+                hParams.Set(1, team);
+                return MRES_ChangedHandled;
+            }
         }
     }
     return MRES_Ignored;
@@ -755,6 +803,21 @@ void StripColors(const char[] szMessage, char[] szBuffer, int maxlength)
 }
 
 
+public any Native_StripColors(Handle plugin, int params)
+{
+    int length;
+    GetNativeStringLength(1);
+
+    char[] szMessage = new char[length+2];
+    GetNativeString(1, szMessage, length+1);
+
+    length = GetNativeCell(3);
+    char[] szBuffer = new char[length+2];
+
+    StripColors(szMessage, szBuffer, length);
+    SetNativeString(2, szBuffer, length);
+    return 1;
+}
 public int Native_SetHandsPushForce(Handle plugin, int params)
 {
     float flForce = GetNativeCell(1);
