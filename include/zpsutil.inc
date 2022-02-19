@@ -110,7 +110,7 @@ native float GetFlashBattery(int client);
 native float SetFlashBattery(int client, float battery);
 native float GetPlayerWeight(int client);
 
-native void PlayerDropWeapon(int client, int weapon, bool bUknown = false);
+native void PlayerDropWeapon(int client, int weapon, bool bUnknown = false);
 native void RespawnPlayer(int client);
 // internally calls Precache on the model
 native void SetArmModel(int client, const char[] szArmModel);
