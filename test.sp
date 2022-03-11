@@ -1,57 +1,37 @@
 #include <sourcemod>
 #include <sdktools>
-#include <zpsutil>
 
-public Action OnGetPlayerSpeed(int client, float &flSpeed)
+enum
 {
-    flSpeed = flSpeed * 1.2;
-    return Plugin_Changed;
-}
-public Action OnPlayerJoinTeam(int client, int &team)
-{
-    PrintToChatAll("OnPlayerJoinTeam(%N, %d)", client, team);
-    return Plugin_Continue;
+    AMMO_TYPE_PISTOL = 1,
+    AMMO_TYPE_REVOLVER,
+    AMMO_TYPE_SHOTGUN,
+    AMMO_TYPE_RIFLE,
+    AMMO_TYPE_BARRICADE
 }
 
 public void OnPluginStart()
 {
     RegAdminCmd("sm_test", Command_Test, ADMFLAG_ROOT);
-    RegAdminCmd("sm_test2", Command_Test2, ADMFLAG_ROOT);
 }
 
-public Action Command_Test2(int client, int args)
-{
-    char m_AdminStrFlags[PLATFORM_MAX_PATH];
-    GetEntPropString(client, Prop_Send, "m_AdminStrFlags", m_AdminStrFlags, sizeof(m_AdminStrFlags));
-    PrintToChat(client, "m_AdminStrFlags: %s", m_AdminStrFlags);
-    return Plugin_Handled;
-}
-public Action Command_Test(int client, int args)
-{
-    PrintToConsole(0, "Zombielives: %d", GetZombieLives());
-    AddZombieLives(20);
-    PrintToConsole(0, "Zombielives: %d", GetZombieLives());
-    return Plugin_Handled;
-}
-
-stock GetServerPort(char[] buffer, int maxlength)
+void ForceSuicide(int client, bool bExplode = false)
 {
     static Handle hSDKCall = null;
-    if(hSDKCall == null)
-    {
-        StartPrepSDKCall(SDKCall_GameRules);
-        PrepSDKCall_SetVirtual(178);
-        PrepSDKCall_SetReturnInfo(SDKType_String, SDKPass_Pointer);
-        hSDKCall = EndPrepSDKCall();
-        if(hSDKCall == null)
-        {
-            PrintToServer("SDKSetup failed for CZombiePanic::GrabServerPort");
-            return;
-        }
-    }
+    StartPrepSDKCall(SDKCall_Player);
+    PrepSDKCall_SetVirtual(453);
+    PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+    PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+    hSDKCall = EndPrepSDKCall();
+
     if(hSDKCall != null)
     {
-        SDKCall(hSDKCall, buffer, maxlength);
+        SDKCall(hSDKCall, client, bExplode, false);
     }
 }
 
+public Action Command_Test(int client, int args)
+{
+    ForceSuicide(client);
+    return Plugin_Handled;
+}

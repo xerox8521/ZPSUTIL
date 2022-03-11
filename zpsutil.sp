@@ -1028,7 +1028,7 @@ public int Native_SetInfection(Handle plugin, int params)
     if(hSDKCall == null)
     {
         StartPrepSDKCall(SDKCall_Player);
-        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Virtual, "CZP_Player::SetInfection");
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::SetInfection");
         PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
         PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
         PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
@@ -1062,7 +1062,7 @@ public int Native_SetInfectionResistance(Handle plugin, int params)
     if(hSDKCall == null)
     {
         StartPrepSDKCall(SDKCall_Player);
-        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Virtual, "CZP_Player::SetInfectionResistance");
+        PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::SetInfectionResistance");
         PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
         PrepSDKCall_AddParameter(SDKType_Float, SDKPass_Plain);
         hSDKCall = EndPrepSDKCall();
