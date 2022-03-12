@@ -11,7 +11,6 @@ DynamicDetour ddOnGiveWeaponToPlayer = null;
 DynamicDetour ddOnPlayerWeaponPickup = null;
 DynamicDetour ddOnRoundStart = null;
 DynamicDetour ddOnEscapeByTrigger = null;
-DynamicDetour ddOnCheckEmitReasonablePhysicsSpew = null;
 DynamicDetour ddOnIncrementArmorValue = null;
 DynamicDetour ddHandleJoinTeam = null;
 DynamicDetour ddVoiceMenu = null;

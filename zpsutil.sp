@@ -29,11 +29,33 @@
 #include "handles.sp"
 #include "variables.sp"
 
+#include "detours/Hook_OnCheckAFK.sp"
+#include "detours/Hook_OnEscapeByTrigger.sp"
+#include "detours/Hook_OnExecuteAction.sp"
+#include "detours/Hook_OnGetSpeed.sp"
+#include "detours/Hook_OnGiveAmmoToPlayer.sp"
+#include "detours/Hook_OnGiveHealthPrimary.sp"
+#include "detours/Hook_OnGiveHealthSecondary.sp"
+#include "detours/Hook_OnGiveWeaponToPlayer.sp"
+#include "detours/Hook_OnIncrementArmorValue.sp"
+#include "detours/Hook_OnPlayerJoinTeam.sp"
+#include "detours/Hook_OnPlayerVoiceText.sp"
+#include "detours/Hook_OnPlayerWeaponPickup.sp"
+#include "detours/Hook_OnRoundEnd.sp"
+#include "detours/Hook_OnRoundStart.sp"
+
 #include "functions/CreateGlobalForwards.sp"
 #include "functions/CreateNatives.sp"
 #include "functions/IsMeleeWeapon.sp"
 #include "functions/SetupDetours.sp"
+#include "functions/SetupEntityOutputs.sp"
 #include "functions/StripColors.sp"
+
+#include "hooks/OnCaptureEnd.sp"
+#include "hooks/OnCaptureStart.sp"
+#include "hooks/OnClientPutInServer.sp"
+#include "hooks/OnClientSayCommand.sp"
+#include "hooks/OnEntityCreated.sp"
 
 #include "natives/entities/Native_GetEntityMaxHealth.sp"
 #include "natives/entities/Native_SetEntityMaxHealth.sp"
@@ -157,15 +179,12 @@ public void OnPluginStart()
 
     SetupDetours();
 
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureStart", OnCaptureStart);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureStart", OnCaptureStart);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnZombieCaptureCompleted", OnCaptureEnd);
-    HookEntityOutput("trigger_capturepoint_zp", "m_OnHumanCaptureCompleted", OnCaptureEnd);
+    SetupEntityOutputs();
 
 
 
     sm_zps_util_colored_tags = CreateConVar("sm_zps_util_colored_tags", "0", "Enable or Disable colored messages from players in chat.\n1 = Colors allowed. 0 = No colors allowed", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-    sm_zps_afk_admin_immunity = CreateConVar("sm_zps_afk_admin_immunity", "1", "Should SOURCEMOD Based admins be except from the Game AFK check.\n1 = Sourcemod Admins should be except. 0 = Sourcemod admins should still be checked", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    sm_zps_afk_admin_immunity = CreateConVar("sm_zps_afk_admin_immunity", "1", "Should SOURCEMOD Based admins be except from the Game AFK check.\n1 = Sourcemod Admins should be excempt. 0 = Sourcemod admins should still be checked", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     
     AutoExecConfig(true);
 
@@ -184,413 +203,4 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     RegPluginLibrary("zpsutil");
     return APLRes_Success;
-}
-
-
-public void OnClientPutInServer(int client)
-{
-    bModifiedChat[client] = false;
-}
-
-public void OnCaptureEnd(const char[] output, int caller, int activator, float delay)
-{
-    if(gfCaptured.FunctionCount > 0)
-    {
-        int teamindex = TEAM_LOBBY;
-        if(StrEqual(output, "m_OnZombieCaptureCompleted"))
-        {
-            teamindex = TEAM_ZOMBIE;
-        }
-        else if(StrEqual(output, "m_OnHumanCaptureCompleted"))
-        {
-            teamindex = TEAM_SURVIVOR;
-        }
-
-        Call_StartForward(gfCaptured);
-        Call_PushCell(caller);
-        Call_PushCell(teamindex);
-        Call_Finish();
-    }  
-}
-
-public void OnCaptureStart(const char[] output, int caller, int activator, float delay)
-{
-    if(gfCaptureStart.FunctionCount > 0)
-    {
-        int teamindex = TEAM_LOBBY;
-        if(StrEqual(output, "m_OnZombieCaptureStart"))
-        {
-            teamindex = TEAM_ZOMBIE;
-        }
-        else if(StrEqual(output, "m_OnHumanCaptureStart"))
-        {
-            teamindex = TEAM_SURVIVOR;
-        }
-
-        Call_StartForward(gfCaptureStart);
-        Call_PushCell(caller);
-        Call_PushCell(teamindex);
-        Call_Finish();
-    }   
-}
-
-public void OnEntityCreated(int entity, const char[] szClassName)
-{
-    if(StrEqual(szClassName, "weapon_inoculator") || StrEqual(szClassName, "weapon_inoculator_delay") || StrEqual(szClassName, "weapon_inoculator_full"))
-    {
-        dhHealthPrimary.HookEntity(Hook_Post, entity, Hook_OnGiveHealthPrimary);
-        dhHealthSecondary.HookEntity(Hook_Post, entity, Hook_OnGiveHealthSecondary);
-        dhHealthExecuteAction.HookEntity(Hook_Post, entity, Hook_OnExecuteAction);
-    }
-}
-
-
-public Action OnClientSayCommand(int client, const char[] szCommand, const char[] szArgs)
-{
-    if(sm_zps_util_colored_tags.BoolValue == false)
-    {
-        if(IsChatTrigger())
-            return Plugin_Continue;
-
-        if(bModifiedChat[client] == false)
-        {
-            char buffer[PLATFORM_MAX_PATH];
-            StripColors(szArgs, buffer, sizeof(buffer));
-            bModifiedChat[client] = true;
-            ClientCommand(client, "%s %s", szCommand, buffer);
-            CreateTimer(1.5, t_ResetModifiedChat, GetClientSerial(client), TIMER_FLAG_NO_MAPCHANGE);
-            return Plugin_Stop;
-
-        }
-    }
-    return Plugin_Continue;    
-}
-
-public Action t_ResetModifiedChat(Handle timer, any serial)
-{
-    int client = GetClientFromSerial(serial);
-    if(!client) 
-        return Plugin_Continue;
-    if(!IsClientInGame(client)) 
-        return Plugin_Continue;
-
-    if(bModifiedChat[client])
-    {
-        bModifiedChat[client] = false;
-    } 
-    return Plugin_Continue;
-}
-
-
-public MRESReturn Hook_OnCheckEmitReasonablePhysicsSpew(DHookReturn hReturn)
-{
-    hReturn.Value = false;
-    return MRES_Supercede;
-}
-
-public MRESReturn Hook_OnRoundEnd(DHookParam hParam)
-{
-    if(gfRoundEnd.FunctionCount > 0)
-    {
-        int winner = hParam.Get(1);
-        if(winner != WINNER_SURVIVORS && winner != WINNER_ZOMBIES)
-        {
-            winner = WINNER_STALEMATE;
-        }
-        Call_StartForward(gfRoundEnd);
-        Call_PushCell(winner);
-        Call_Finish();
-    }
-    
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnIncrementArmorValue(int pThis, DHookParam hParam)
-{
-    if(gfIncrementArmorValue.FunctionCount > 0)
-    {
-        int nMaxValue = hParam.Get(2);
-        Call_StartForward(gfIncrementArmorValue);
-        Call_PushCell(pThis);
-        Call_PushCell(hParam.Get(1));
-        Call_PushCellRef(nMaxValue);
-        Action result = Plugin_Continue;
-        Call_Finish(result);
-        if(result == Plugin_Changed)
-        {
-            hParam.Set(2, nMaxValue);
-            return MRES_ChangedHandled;
-        }
-    }
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnEscapeByTrigger(int pThis, DHookParam hParam)
-{
-    if(gfEscapeByTrigger.FunctionCount > 0)
-    {
-        if(hParam.IsNull(1))
-        return MRES_Ignored;
-    
-        int client = hParam.Get(1);
-        bool bSendMessage = hParam.Get(2);
-
-        Call_StartForward(gfEscapeByTrigger);
-        Call_PushCell(pThis);
-        Call_PushCell(client);
-        Call_PushCell(bSendMessage);
-        Call_Finish();
-    }
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnGiveHealthPrimary(int pThis, DHookReturn hReturn)
-{
-    if(gfHealthPrimary.FunctionCount > 0)
-    {
-        int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
-        int health = hReturn.Value;
-        
-        Action result = Plugin_Continue;
-        Call_StartForward(gfHealthPrimary);
-        Call_PushCell(pThis);
-        Call_PushCell(owner);
-        Call_PushCellRef(health);
-        Call_Finish(result);
-
-        if(result == Plugin_Changed)
-        {
-            hReturn.Value = health;
-            return MRES_Supercede;
-        }
-    }
-    return MRES_Ignored;
-}
-
-public MRESReturn Hook_OnGiveHealthSecondary(int pThis, DHookReturn hReturn)
-{
-    if(gfHealthSecondary.FunctionCount > 0)
-    {
-        int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
-        int health = hReturn.Value;
-
-        Action result = Plugin_Continue;
-        Call_StartForward(gfHealthSecondary);
-        Call_PushCell(pThis);
-        Call_PushCell(owner);
-        Call_PushCellRef(health);
-        Call_Finish(result);
-
-        if(result == Plugin_Changed)
-        {
-            hReturn.Value = health;
-            return MRES_Supercede;
-        }
-    }
-    return MRES_Ignored;
-}
-
-public MRESReturn Hook_OnExecuteAction(int pThis, DHookParam hParams)
-{
-    if(gfHealthExecuteAction.FunctionCount > 0)
-    {
-        if(hParams.IsNull(1))
-        return MRES_Ignored;
-
-        int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
-        int target = hParams.Get(1);
-        bool bPrimary = hParams.Get(2);
-
-
-        Action result = Plugin_Continue;
-        Call_StartForward(gfHealthExecuteAction);
-        Call_PushCell(pThis);
-        Call_PushCell(owner);
-        Call_PushCell(target);
-        Call_PushCell(bPrimary);
-        Call_Finish(result);
-
-        if(result == Plugin_Handled)
-        {
-            return MRES_Supercede;
-        }
-    }
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnRoundStart()
-{
-    if(gfRoundStart.FunctionCount > 0)
-    {
-        Call_StartForward(gfRoundStart);
-        Call_Finish();
-    }
-    
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnPlayerWeaponPickup(int pThis, DHookParam hParams)
-{
-    if(gfPlayerWeaponPickup.FunctionCount > 0)
-    {
-        if(!hParams.IsNull(1))
-        {
-            int weapon = hParams.Get(1);
-            bool bUnknown = hParams.Get(2);
-            int inventorySlot = hParams.Get(3);
-            bool bForcePickup = hParams.Get(4);
-
-            char szClassName[32];
-            GetEntityClassname(weapon, szClassName, sizeof(szClassName));
-
-            Action result = Plugin_Continue;
-
-            Call_StartForward(gfPlayerWeaponPickup);
-            Call_PushCell(pThis);
-            Call_PushCell(weapon);
-            Call_PushString(szClassName);
-            Call_PushCell(bUnknown);
-            Call_PushCell(inventorySlot);
-            Call_PushCell(bForcePickup);
-            Call_Finish(result);
-
-            if(result == Plugin_Handled)
-            {
-                return MRES_Supercede;
-            }
-        }
-    }
-    
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnGiveWeaponToPlayer(int pThis, DHookParam hParams)
-{
-    if(gfGiveWeaponToPlayer.FunctionCount > 0)
-    {
-        if(!hParams.IsNull(1) && !hParams.IsNull(2))
-        {
-            int receiver = hParams.Get(1);
-            int weapon = hParams.Get(2);
-
-            Action result = Plugin_Continue;
-
-            char szClassName[32];
-            GetEntityClassname(weapon, szClassName, sizeof(szClassName));
-
-            Call_StartForward(gfGiveWeaponToPlayer);
-            Call_PushCell(pThis);
-            Call_PushCell(receiver);
-            Call_PushCell(weapon);
-            Call_PushString(szClassName);
-            Call_Finish(result);
-
-            if(result == Plugin_Handled)
-            {
-                return MRES_Supercede;
-            }
-        }
-    }
-    
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnGiveAmmoToPlayer(int pThis, DHookParam hParams)
-{
-    if(gfGiveAmmoToPlayer.FunctionCount > 0)
-    {
-        if(!hParams.IsNull(1))
-        {
-            int receiver = hParams.Get(1);
-            Action result = Plugin_Continue;
-
-            Call_StartForward(gfGiveAmmoToPlayer);
-            Call_PushCell(pThis);
-            Call_PushCell(receiver);
-            Call_Finish(result);
-            if(result == Plugin_Handled)
-            {
-                return MRES_Supercede;
-            }
-        }
-    }
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnGetSpeed(int pThis, DHookReturn hReturn)
-{
-    if(gfGetSpeed.FunctionCount > 0)
-    {
-        if(!pThis)
-        return MRES_Ignored;
-        if(!IsClientInGame(pThis))
-            return MRES_Ignored;
-
-        float flSpeed = hReturn.Value;
-        
-        Action result = Plugin_Continue;
-
-        Call_StartForward(gfGetSpeed);
-        Call_PushCell(pThis);
-        Call_PushFloatRef(flSpeed);
-        Call_Finish(result);
-        if(result == Plugin_Changed)
-        {
-            hReturn.Value = flSpeed;
-            return MRES_Supercede;
-        }
-    }
-    
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnCheckAFK(int pThis)
-{
-    if(!pThis)
-        return MRES_Ignored;
-    if(!IsClientInGame(pThis))
-        return MRES_Ignored;
-    
-    if(sm_zps_afk_admin_immunity.BoolValue && CheckCommandAccess(pThis, "sm_zps_afk_adm_immunity", ADMFLAG_KICK, true))
-    {
-        return MRES_Supercede;
-    }
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnPlayerVoiceText(int pThis, DHookParam hParams)
-{
-    if(gfVoiceMenu.FunctionCount > 0)
-    {
-        char szInternalBuffer[64];
-        hParams.GetString(1, szInternalBuffer, sizeof(szInternalBuffer));
-
-        Call_StartForward(gfVoiceMenu);
-        Call_PushCell(pThis);
-        Call_PushString(szInternalBuffer);
-        Action result = Plugin_Continue;
-        Call_Finish(result);
-        if(result == Plugin_Handled)
-        {
-            return MRES_Supercede;
-        }
-    }
-    return MRES_Ignored;
-}
-public MRESReturn Hook_OnPlayerJoinTeam(int pThis, DHookReturn hReturn, DHookParam hParams)
-{
-    if(gfHandleJoinTeam.FunctionCount > 0)
-    {
-        int team = hParams.Get(1);
-        if(team > 0)
-        {
-            Call_StartForward(gfHandleJoinTeam);
-            Call_PushCell(pThis);
-            Call_PushCellRef(team);
-
-            Action result = Plugin_Continue;
-            Call_Finish(result);
-            if(result == Plugin_Handled)
-            {
-                hReturn.Value = false;
-                return MRES_Supercede;
-            }
-            else if(result == Plugin_Changed)
-            {
-                hParams.Set(1, team);
-                return MRES_ChangedHandled;
-            }
-        }
-    }
-    return MRES_Ignored;
 }

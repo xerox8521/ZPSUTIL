@@ -101,14 +101,6 @@ void SetupDetours()
         return;
     }
     ddOnEscapeByTrigger.Enable(Hook_Post, Hook_OnEscapeByTrigger);
-    
-    ddOnCheckEmitReasonablePhysicsSpew = DynamicDetour.FromConf(g_pGameConfig, "OnCheckEmitReasonablePhysicsSpew");
-    if(ddOnCheckEmitReasonablePhysicsSpew == null)
-    {
-        SetFailState("Failed to setup OnCheckEmitReasonablePhysicsSpew detour. Update your Gamedata!");
-        return;
-    }
-    ddOnCheckEmitReasonablePhysicsSpew.Enable(Hook_Post, Hook_OnCheckEmitReasonablePhysicsSpew);
 
     ddOnIncrementArmorValue = DynamicDetour.FromConf(g_pGameConfig, "OnIncrementArmorValue");
     if(ddOnIncrementArmorValue == null)
