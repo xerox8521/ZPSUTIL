@@ -76,4 +76,5 @@ void CreateNatives()
     CreateNative("IsHalloween",                 Native_IsHalloween);
     CreateNative("IsChristmas",                 Native_IsChristmas);
     CreateNative("StripColors",                 Native_StripColors);
+    CreateNative("GivePlayerBarricade",         Native_GiveBarricadeAmmo);
 }

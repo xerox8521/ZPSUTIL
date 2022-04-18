@@ -7,3 +7,4 @@ include/*
 !*include/zpsutil.inc
 *.txt
 !zpsutil.txt
+test.sp

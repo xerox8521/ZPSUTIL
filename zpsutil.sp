@@ -44,12 +44,15 @@
 #include "detours/Hook_OnRoundEnd.sp"
 #include "detours/Hook_OnRoundStart.sp"
 
+#include "functions/AddBarricadeHealth.sp"
 #include "functions/CreateGlobalForwards.sp"
 #include "functions/CreateNatives.sp"
+#include "functions/GetBarricadeHealth.sp"
 #include "functions/IsMeleeWeapon.sp"
 #include "functions/SetupDetours.sp"
 #include "functions/SetupEntityOutputs.sp"
 #include "functions/StripColors.sp"
+
 
 #include "hooks/OnCaptureEnd.sp"
 #include "hooks/OnCaptureStart.sp"
@@ -97,6 +100,7 @@
 #include "natives/player/Native_GetFlashBattery.sp"
 #include "natives/player/Native_GetPlayerWeight.sp"
 #include "natives/player/Native_GetRemainingInventorySlots.sp"
+#include "natives/player/Native_GiveBarricadeAmmo.sp"
 #include "natives/player/Native_GivePlayerWeapon.sp"
 #include "natives/player/Native_HasActiveIED.sp"
 #include "natives/player/Native_HasAmmoType.sp"

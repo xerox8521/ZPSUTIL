@@ -288,6 +288,16 @@
                 "library"   "server"
                 "linux"     "@_Z20ZPSUTILS_IsHalloweenv"
             }
+            "CZP_Player::GetBarricadeHealth"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player18GetBarricadeHealthEi"
+            }
+            "CZP_Player::AddBarricadeHealth"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player18AddBarricadeHealthEii"
+            }
         }
         "Functions"
         {
@@ -313,17 +323,15 @@
                 "callconv"  "thiscall"
                 "return"    "void"
                 "this"      "entity"
+                "arguments"
                 {
-                    "arguments"
+                    "nCount"
                     {
-                        "nCount"
-                        {
-                            "type"  "int"
-                        }
-                        "nMaxValue"
-                        {
-                            "type"  "int"
-                        }
+                       "type"  "int"
+                    }
+                    "nMaxValue"
+                    {
+                        "type"  "int"
                     }
                 }
             }

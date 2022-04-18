@@ -1,37 +1,75 @@
 #include <sourcemod>
 #include <sdktools>
 
-enum
-{
-    AMMO_TYPE_PISTOL = 1,
-    AMMO_TYPE_REVOLVER,
-    AMMO_TYPE_SHOTGUN,
-    AMMO_TYPE_RIFLE,
-    AMMO_TYPE_BARRICADE
-}
+#define AMMO_TYPE_BARRICADE 5
+
+ConVar sv_zps_hardcore = null;
+
+GameData g_pGameConfig = null;
 
 public void OnPluginStart()
 {
     RegAdminCmd("sm_test", Command_Test, ADMFLAG_ROOT);
+
+    g_pGameConfig = new GameData("test");
+    if(g_pGameConfig == null)
+    {
+        SetFailState("Missing gamedata test.txt");
+        return;
+    }
+
+    sv_zps_hardcore = FindConVar("sv_zps_hardcore");
 }
 
-void ForceSuicide(int client, bool bExplode = false)
+
+int GetBarricadeHealth(int client, int index)
 {
     static Handle hSDKCall = null;
     StartPrepSDKCall(SDKCall_Player);
-    PrepSDKCall_SetVirtual(453);
-    PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
-    PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+    PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::GetBarricadeHealth");
+    PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+    PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
     hSDKCall = EndPrepSDKCall();
-
     if(hSDKCall != null)
     {
-        SDKCall(hSDKCall, client, bExplode, false);
+        return SDKCall(hSDKCall, client, index);
+    }
+    return 0;
+}
+
+void AddBarricadeHealth(int client, int index, int health)
+{
+    static Handle hSDKCall = null;
+    StartPrepSDKCall(SDKCall_Player);
+    PrepSDKCall_SetFromConf(g_pGameConfig, SDKConf_Signature, "CZP_Player::AddBarricadeHealth");
+    PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+    PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+    hSDKCall = EndPrepSDKCall();
+    if(hSDKCall != null)
+    {
+        SDKCall(hSDKCall, client, index, health);
+    }
+}
+
+void GiveBarricade(int client, int amount)
+{
+    int k, l;
+
+    GivePlayerAmmo(client, amount, AMMO_TYPE_BARRICADE);
+    
+    for(k = 0; k != amount; ++k)
+    {
+        for(l = 1; l != 7; ++l)
+        {
+            if(!GetBarricadeHealth(client, l))
+                break;
+        }
+        AddBarricadeHealth(client, l, (sv_zps_hardcore.BoolValue == false) ? 450 : 350);
     }
 }
 
 public Action Command_Test(int client, int args)
 {
-    ForceSuicide(client);
+    GiveBarricade(client, 5);
     return Plugin_Handled;
 }

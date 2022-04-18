@@ -24,7 +24,7 @@
 #endif
 #define _zpsutil_included
 
-enum AmmoType
+enum
 {
     AMMO_TYPE_PISTOL = 1,
     AMMO_TYPE_REVOLVER,
@@ -94,7 +94,7 @@ native bool IsWeaponSwitchAllowed(int client);
 native bool IsInPhoneTrigger(int client);
 native bool IsRoaring(int client);
 native bool IsBerzerking(int client);
-native bool PlayerHasAmmoType(int client, AmmoType ammoType);
+native bool PlayerHasAmmoType(int client, int ammoType);
 native bool PlayerHasActiveIED(int client);
 native bool PlayerHasDeliveryItem(int client);
 native bool IsInPanic(int client);
@@ -120,6 +120,10 @@ native void SetPlayerArmour(int client, int armour);
 native void AddPlayerWeight(int client, float weight);
 native void RemovePlayerWeight(int client, float weight);
 native void DropAllWeapons(int client);
+
+// This properly initializes the correct values for barricade ammo.
+// THIS IS AN EXPIERMENTAL FUNCTION which means it CAN cause issues / crashes.
+native void GivePlayerBarricade(int client, int amount);
 
 // This function internally makes all the function calls required
 // to make the player properly escape. Eg. Drop Weapons, Armor, Stop any pending infection etc.
