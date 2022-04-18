@@ -122,7 +122,7 @@ native void RemovePlayerWeight(int client, float weight);
 native void DropAllWeapons(int client);
 
 // This properly initializes the correct values for barricade ammo.
-// THIS IS AN EXPIERMENTAL FUNCTION which means it CAN cause issues / crashes.
+// THIS IS AN EXPERIMENTAL FUNCTION which means it CAN cause issues / crashes.
 native void GivePlayerBarricade(int client, int amount);
 
 // This function internally makes all the function calls required
@@ -318,6 +318,7 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("IsChristmas");
    MarkNativeAsOptional("IsHalloween");
    MarkNativeAsOptional("StripColors");
+   MarkNativeAsOptional("GivePlayerBarricade");
 }
 #endif
 
