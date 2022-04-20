@@ -133,6 +133,8 @@
 #include "natives/util/Native_IsHalloween.sp"
 #include "natives/util/Native_PlayMusic.sp"
 #include "natives/util/Native_StripColors.sp"
+#include "natives/util/Native_IsAprilFools.sp"
+#include "natives/util/Native_IsFrenchNationalDay.sp"
 
 #include "natives/weapons/Native_CreateFragGrenade.sp"
 #include "natives/weapons/Native_DetonateGrenade.sp"

@@ -298,6 +298,16 @@
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player18AddBarricadeHealthEii"
             }
+            "ZPSUTILS_IsFrenchNationalDay"
+            {
+                "library"   "server"
+                "linux"     "@_Z28ZPSUTILS_IsFrenchNationalDayv"
+            }
+            "ZPSUTILS_IsAprilFools"
+            {
+                "library"   "server"
+                "linux"     "@_Z21ZPSUTILS_IsAprilFoolsv"
+            }
         }
         "Functions"
         {

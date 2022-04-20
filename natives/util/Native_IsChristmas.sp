@@ -1,9 +1,5 @@
 public any Native_IsChristmas(Handle plugin, int params)
 {
-    int client = GetNativeCell(1);
-    if(client < 1 || client > MaxClients) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is invalid", client);
-    if(!IsClientInGame(client)) return ThrowNativeError(SP_ERROR_NATIVE, "Client index %d is not ingame", client);
-
     static Handle hSDKCall = null;
     if(hSDKCall == null)
     {

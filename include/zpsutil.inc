@@ -220,6 +220,8 @@ native void DetonateGrenade(int grenade);
 
 native bool IsChristmas();
 native bool IsHalloween();
+native bool IsFrenchNationalDay();
+native bool IsAprilFools();
 
 native void StripColors(const char[] szMsg, char[] szBuffer, int maxlength);
 
@@ -319,6 +321,8 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("IsHalloween");
    MarkNativeAsOptional("StripColors");
    MarkNativeAsOptional("GivePlayerBarricade");
+   MarkNativeAsOptional("IsFrenchNationalDay");
+   MarkNativeAsOptional("IsAprilFools");
 }
 #endif
 
