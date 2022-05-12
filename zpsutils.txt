@@ -339,6 +339,11 @@
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player11EquipPlayerEv"
             }
+            "CZP_Player::GetTeamSpeed"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player12GetTeamSpeedEv"
+            }
         }
         "Functions"
         {

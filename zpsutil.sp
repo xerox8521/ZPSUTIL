@@ -133,6 +133,7 @@
 #include "natives/player/Native_SetInfectionResistance.sp"
 #include "natives/player/Native_ToggleWeaponSwitch.sp"
 #include "natives/player/Native_SetMaxSpeed.sp"
+#include "natives/player/Native_GetTeamSpeed.sp"
 
 #include "natives/util/Native_IsChristmas.sp"
 #include "natives/util/Native_IsHalloween.sp"

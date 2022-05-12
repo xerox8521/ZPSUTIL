@@ -83,4 +83,5 @@ void CreateNatives()
     CreateNative("SetPlayerMaxSpeed",           Native_SetMaxSpeed);
     CreateNative("GetMapType",                  Native_GetMapType);
     CreateNative("SetUberPushEnabled",          Native_SetUberPushEnabled);
+    CreateNative("GetTeamSpeed",                Native_GetTeamSpeed);
 }

@@ -125,6 +125,7 @@ native bool IsMuted(int client);
 native float GetFlashBattery(int client);
 native float SetFlashBattery(int client, float battery);
 native float GetPlayerWeight(int client);
+native float GetTeamSpeed(int client); // This returns the base movement speed before any changes.
 
 native void PlayerDropWeapon(int client, int weapon, bool bUnknown = false);
 native void RespawnPlayer(int client);
