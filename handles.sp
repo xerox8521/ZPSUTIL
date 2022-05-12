@@ -15,10 +15,11 @@ DynamicDetour ddOnIncrementArmorValue = null;
 DynamicDetour ddHandleJoinTeam = null;
 DynamicDetour ddVoiceMenu = null;
 DynamicDetour ddOnRoundEnd = null;
+DynamicDetour ddOnZPDataInitialize = null;
+DynamicDetour ddOnEquipPlayer = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
-GlobalForward gfGetSpeed = null;
 GlobalForward gfGiveAmmoToPlayer = null;
 GlobalForward gfGiveWeaponToPlayer = null;
 GlobalForward gfPlayerWeaponPickup = null;
@@ -31,6 +32,7 @@ GlobalForward gfEscapeByTrigger = null;
 GlobalForward gfCaptureStart = null;
 GlobalForward gfCaptured = null;
 GlobalForward gfIncrementArmorValue = null;
+GlobalForward gfEquipPlayer = null;
 
 
 ConVar sm_zps_util_colored_tags = null;

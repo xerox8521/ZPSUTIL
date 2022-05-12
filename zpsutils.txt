@@ -2,6 +2,17 @@
 {
     "zps"
     {
+        "Addresses"
+        {
+            "gpZPData"
+            {
+                "linux"
+                {
+                    "signature" "gZPData"
+                }
+                "read" "0"
+            }
+        }
         "Offsets"
         {
             "OS"
@@ -308,22 +319,54 @@
                 "library"   "server"
                 "linux"     "@_Z21ZPSUTILS_IsAprilFoolsv"
             }
+            "ZPSUTILS_GetAmmoWeight"
+            {
+                "library"   "server"
+                "linux"     "@_Z21ZPUTILS_GetAmmoWeighti"
+            }
+            "CZPData::Initialize"
+            {
+                "library"   "server"
+                "linux"     "@_ZN7CZPDATA10InitializeEv"
+            }
+            "CZPData::GrabItemsGame_Float"
+            {
+                "library"   "server"
+                "linux"     "@_ZN7CZPDATA19GrabItemsGame_FloatEPKcS1_S1_"
+            }
+            "CZP_Player::EquipPlayer"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player11EquipPlayerEv"
+            }
         }
         "Functions"
         {
+            "OnEquipPlayer"
+            {
+                "signature" "CZP_Player::EquipPlayer"
+                "callconv"  "thiscall"
+                "return"    "void"
+                "this"      "entity"
+            }
+            "CZPDataInitialize"
+            {
+                "signature" "CZPData::Initialize"
+                "callconv"  "thiscall"
+                "return"    "void"
+                "this"      "address"
+            }
             "OnRoundEnd"
             {
                 "signature" "CZombiePanic::CallInfoText"
                 "callconv"  "thiscall"
                 "return"    "void"
                 "this"      "ignore"
+                "arguments"
                 {
-                    "arguments"
+                    "iWinner"
                     {
-                        "iWinner"
-                        {
-                            "type"  "int"
-                        }
+                        "type"  "int"
                     }
                 }
             }
@@ -344,12 +387,6 @@
                         "type"  "int"
                     }
                 }
-            }
-            "OnCheckEmitReasonablePhysicsSpew"
-            {
-                "signature" "CheckEmitReasonablePhysicsSpew"
-                "callconv"  "cdecl"
-                "return"    "bool"
             }
             "OnEscapeByTrigger"
             {

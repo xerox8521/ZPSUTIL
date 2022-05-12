@@ -48,6 +48,19 @@ enum
 }
 
 
+enum 
+{
+    MAPTYPE_SURVIVAL = 1,
+    MAPTYPE_OBJECTIVE,
+    MAPTYPE_TEAMARENA, // Not used in 3.X | Was from < 2.4 days
+    MAPTYPE_HARDCORE,
+    MAPTYPE_BOTS,
+    MAPTYPE_DEATHRUN,
+    MAPTYPE_UBERPUSH,
+    MAPTYPE_GUINEAPIG,
+    MAPTYPE_FARMMAP,
+}
+
 // Return Plugin_Changed if you have modifed team
 // Return Plugin_Handled to prevent the player from joining a team.
 forward Action OnPlayerJoinTeam(int client, int &team);
@@ -88,6 +101,9 @@ forward void OnStartCapture(int trigger, int team);
 // Called when a team completed captured a trigger_capturepoint_zp.
 forward void OnCaptured(int trigger, int team);
 
+// Called when the player is given their weapons.
+forward void OnEquipPlayer(int client);
+
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
 native bool IsWeaponSwitchAllowed(int client);
@@ -120,6 +136,7 @@ native void SetPlayerArmour(int client, int armour);
 native void AddPlayerWeight(int client, float weight);
 native void RemovePlayerWeight(int client, float weight);
 native void DropAllWeapons(int client);
+native void SetPlayerMaxSpeed(int client, float flMaxSpeed);
 
 // This properly initializes the correct values for barricade ammo.
 // THIS IS AN EXPERIMENTAL FUNCTION which means it CAN cause issues / crashes.
@@ -199,6 +216,9 @@ native int GetBestRoaringCarrier(int client);
 native bool IsInTestMode();
 native bool IsWarmup();
 native bool IsRoundOngoing(bool bIncludeTestMode = false);
+native bool SetUberPushEnabled(bool bToggle);
+
+native int GetMapType();
 
 
 native int GetWeaponOwner(int weapon);
@@ -222,6 +242,8 @@ native bool IsChristmas();
 native bool IsHalloween();
 native bool IsFrenchNationalDay();
 native bool IsAprilFools();
+
+native int GetAmmoWeight(int ammoType);
 
 native void StripColors(const char[] szMsg, char[] szBuffer, int maxlength);
 
@@ -323,6 +345,7 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("GivePlayerBarricade");
    MarkNativeAsOptional("IsFrenchNationalDay");
    MarkNativeAsOptional("IsAprilFools");
+   MarkNativeAsOptional("GetAmmoWeight");
 }
 #endif
 

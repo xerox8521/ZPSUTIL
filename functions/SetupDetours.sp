@@ -117,4 +117,20 @@ void SetupDetours()
         return;
     }
     ddOnRoundEnd.Enable(Hook_Post, Hook_OnRoundEnd);
+
+    ddOnZPDataInitialize = DynamicDetour.FromConf(g_pGameConfig, "CZPDataInitialize");
+    if(ddOnZPDataInitialize == null)
+    {
+        SetFailState("Failed to setup CZPData::Initialize detour. Update your Gamedata!");
+        return;
+    }
+    ddOnZPDataInitialize.Enable(Hook_Post, Hook_OnZPDataInit);
+
+    ddOnEquipPlayer = DynamicDetour.FromConf(g_pGameConfig, "OnEquipPlayer");
+    if(ddOnEquipPlayer == null)
+    {
+        SetFailState("Failed to setup OnEquipPlayer detour. Update your Gamedata!");
+        return;
+    }
+    ddOnEquipPlayer.Enable(Hook_Post, Hook_OnEquipPlayer);
 }

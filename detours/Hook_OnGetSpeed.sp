@@ -1,26 +1,71 @@
 public MRESReturn Hook_OnGetSpeed(int pThis, DHookReturn hReturn)
 {
-    if(gfGetSpeed.FunctionCount > 0)
-    {
-        if(!pThis)
+    if(!pThis)
         return MRES_Ignored;
-        if(!IsClientInGame(pThis))
-            return MRES_Ignored;
-
-        float flSpeed = hReturn.Value;
-        
-        Action result = Plugin_Continue;
-
-        Call_StartForward(gfGetSpeed);
-        Call_PushCell(pThis);
-        Call_PushFloatRef(flSpeed);
-        Call_Finish(result);
-        if(result == Plugin_Changed)
+    if(!IsClientInGame(pThis))
+        return MRES_Ignored;
+    if(!IsPlayerAlive(pThis))
+        return MRES_Ignored;
+    
+    float flSpeed = flMaxSpeed[pThis];
+    int buttons = GetClientButtons(pThis);
+    int flags = GetEntityFlags(pThis);
+    bool m_bDucked = view_as<bool>(GetEntProp(pThis, Prop_Send, "m_bDucked"));
+    if(GetClientTeam(pThis) == TEAM_ZOMBIE)
+    {
+        if(GetEntProp(pThis, Prop_Send, "m_bBerzerking"))
         {
-            hReturn.Value = flSpeed;
-            return MRES_Supercede;
+            flSpeed *= GrabItemsGame_Float("player_data", "player_speed", "berzerk");
+        }
+        if(GetEntProp(pThis, Prop_Send, "m_fIsSprinting") && GetEntPropFloat(pThis, Prop_Send, "m_flSuitPower") > 0.0)
+        {
+            flSpeed *= GrabItemsGame_Float("player_data", "player_speed", "runspeed_zombie");
         }
     }
+
+    if(buttons & IN_BACK)
+    {
+        if(flags & FL_ONGROUND)
+        {
+            flSpeed -= GrabItemsGame_Float("player_data", "player_speed", "backwards");
+        }
+    }
+
+    if(m_bDucked)
+    {
+        if(flags & FL_ONGROUND)
+        {
+            flSpeed -= GrabItemsGame_Float("player_data", "player_speed_reduce", "ducking");
+        }
+    }
+
+    flSpeed -= GetEntPropFloat(pThis, Prop_Send, "m_flPlayerJumpFatigue");
     
-    return MRES_Ignored;
+    if(GetClientTeam(pThis) == TEAM_SURVIVOR)
+    {
+        flSpeed -= GetEntPropFloat(pThis, Prop_Send, "m_flPlayerWeight");
+        flSpeed -= GetEntPropFloat(pThis, Prop_Send, "m_flPlayerFatigue");
+
+        if(buttons & IN_SPEED)
+        {
+            if(flags & FL_ONGROUND)
+            {
+                flSpeed -= GrabItemsGame_Float("player_data", "player_speed_reduce", "walking");
+            }
+        }
+        if(flSpeed < GrabItemsGame_Float("player_data", "player_speed_reduce", "minimum"))
+        {
+            flSpeed = GrabItemsGame_Float("player_data", "player_speed_reduce", "minimum");
+        }
+    }
+
+    if(GetClientTeam(pThis) == TEAM_ZOMBIE)
+    {
+        if(flSpeed < GrabItemsGame_Float("player_data", "player_speed_reduce", "minimum_zombie"))
+        {
+            flSpeed = GrabItemsGame_Float("player_data", "player_speed_reduce", "minimum_zombie");
+        }
+    }
+    hReturn.Value = flSpeed;
+    return MRES_Supercede;
 }

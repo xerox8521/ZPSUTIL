@@ -79,4 +79,7 @@ void CreateNatives()
     CreateNative("GivePlayerBarricade",         Native_GiveBarricadeAmmo);
     CreateNative("IsFrenchNationalDay",         Native_IsFrenchNationalDay);
     CreateNative("IsAprilFools",                Native_IsAprilFools);
+    CreateNative("GetAmmoWeight",               Native_GetAmmoWeight);
+    CreateNative("SetPlayerMaxSpeed",           Native_SetMaxSpeed);
+    CreateNative("GetMapType",                  Native_GetMapType);
 }

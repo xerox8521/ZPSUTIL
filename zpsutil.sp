@@ -43,6 +43,8 @@
 #include "detours/Hook_OnPlayerWeaponPickup.sp"
 #include "detours/Hook_OnRoundEnd.sp"
 #include "detours/Hook_OnRoundStart.sp"
+#include "detours/Hook_OnZPDataInit.sp"
+#include "detours/Hook_OnEquipPlayer.sp"
 
 #include "functions/AddBarricadeHealth.sp"
 #include "functions/CreateGlobalForwards.sp"
@@ -52,6 +54,8 @@
 #include "functions/SetupDetours.sp"
 #include "functions/SetupEntityOutputs.sp"
 #include "functions/StripColors.sp"
+#include "functions/GrabItemsGame_Float.sp"
+#include "functions/SetMapType.sp"
 
 
 #include "hooks/OnCaptureEnd.sp"
@@ -128,6 +132,7 @@
 #include "natives/player/Native_SetInfection.sp"
 #include "natives/player/Native_SetInfectionResistance.sp"
 #include "natives/player/Native_ToggleWeaponSwitch.sp"
+#include "natives/player/Native_SetMaxSpeed.sp"
 
 #include "natives/util/Native_IsChristmas.sp"
 #include "natives/util/Native_IsHalloween.sp"
@@ -135,6 +140,9 @@
 #include "natives/util/Native_StripColors.sp"
 #include "natives/util/Native_IsAprilFools.sp"
 #include "natives/util/Native_IsFrenchNationalDay.sp"
+#include "natives/util/Native_GetAmmoWeight.sp"
+#include "natives/util/Native_SetUberPushEnabled.sp"
+#include "natives/util/Native_GetMapType.sp"
 
 #include "natives/weapons/Native_CreateFragGrenade.sp"
 #include "natives/weapons/Native_DetonateGrenade.sp"
@@ -187,18 +195,18 @@ public void OnPluginStart()
 
     SetupEntityOutputs();
 
-
-
     sm_zps_util_colored_tags = CreateConVar("sm_zps_util_colored_tags", "0", "Enable or Disable colored messages from players in chat.\n1 = Colors allowed. 0 = No colors allowed", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     sm_zps_afk_admin_immunity = CreateConVar("sm_zps_afk_admin_immunity", "1", "Should SOURCEMOD Based admins be except from the Game AFK check.\n1 = Sourcemod Admins should be excempt. 0 = Sourcemod admins should still be checked", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     
     AutoExecConfig(true);
+}
 
-    for(int i = 1; i <= MaxClients; i++)
-    {
-        if(!IsClientInGame(i)) continue;
-        OnClientPutInServer(i);
-    }
+// Added as of 2021
+public void OnMapInit(const char[] szMapName)
+{
+    SetMapType(szMapName);
+
+    PrintToServer("MapType: %s(%d)", szMapType, MapType);
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
