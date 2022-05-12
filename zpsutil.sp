@@ -206,7 +206,7 @@ public void OnMapInit(const char[] szMapName)
 {
     SetMapType(szMapName);
 
-    PrintToServer("MapType: %s(%d)", szMapType, MapType);
+    PrintToServer("MapType: %s(%d)", szMapType[MapType], MapType);
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)

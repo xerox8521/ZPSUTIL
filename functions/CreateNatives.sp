@@ -82,4 +82,5 @@ void CreateNatives()
     CreateNative("GetAmmoWeight",               Native_GetAmmoWeight);
     CreateNative("SetPlayerMaxSpeed",           Native_SetMaxSpeed);
     CreateNative("GetMapType",                  Native_GetMapType);
+    CreateNative("SetUberPushEnabled",          Native_SetUberPushEnabled);
 }

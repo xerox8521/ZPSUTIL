@@ -11,6 +11,7 @@ public int Native_OpenSteamOverlay(Handle plugin, int params)
 
     GetNativeString(2, szWebsite, length+1);
 
-    ClientCommand(client, "opensteamoverlay %s", szWebsite);
+    // Website requires quotationmarks otherwise it won't work.
+    ClientCommand(client, "opensteamoverlay \"%s\"", szWebsite);
     return 1;
 }
