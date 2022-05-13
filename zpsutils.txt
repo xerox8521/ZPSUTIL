@@ -60,6 +60,10 @@
             {
                 "linux"     "237"
             }
+            "CBaseWeapon_ZombieBase::GetFireRate"
+            {
+                "linux"     "301"
+            }
         }
         "Signatures"
         {
@@ -347,6 +351,13 @@
         }
         "Functions"
         {
+            "OnGetMeleeFireRate"
+            {
+                "offset"    "CBaseWeapon_ZombieBase::GetFireRate"
+                "callconv"  "thiscall"
+                "return"    "float"
+                "this"      "entity"
+            }
             "OnEquipPlayer"
             {
                 "signature" "CZP_Player::EquipPlayer"

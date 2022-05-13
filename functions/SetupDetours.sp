@@ -19,6 +19,13 @@ void SetupDetours()
         SetFailState("Failed to setup OnExecuteAction hook. Update your Gamedata!");
         return;
     }
+
+    dhGetMeleeFireRate = DynamicHook.FromConf(g_pGameConfig, "OnGetMeleeFireRate");
+    if(dhGetMeleeFireRate == null)
+    {
+        SetFailState("Failed to setup OnGetMeleeFireRate. Update your Gamedata!");
+        return;
+    }
     
     ddHandleJoinTeam = DynamicDetour.FromConf(g_pGameConfig, "OnPlayerJoinTeam");
     if(ddHandleJoinTeam == null)

@@ -45,6 +45,7 @@
 #include "detours/Hook_OnRoundStart.sp"
 #include "detours/Hook_OnZPDataInit.sp"
 #include "detours/Hook_OnEquipPlayer.sp"
+#include "detours/Hook_OnGetMeleeFireRate.sp"
 
 #include "functions/AddBarricadeHealth.sp"
 #include "functions/CreateGlobalForwards.sp"

@@ -3,6 +3,7 @@ GameData g_pGameConfig = null;
 DynamicHook dhHealthPrimary = null;
 DynamicHook dhHealthSecondary = null;
 DynamicHook dhHealthExecuteAction = null;
+DynamicHook dhGetMeleeFireRate = null;
 
 DynamicDetour ddOnCheckAFK = null;
 DynamicDetour ddOnGetSpeed = null;
