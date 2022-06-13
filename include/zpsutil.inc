@@ -104,6 +104,8 @@ forward void OnCaptured(int trigger, int team);
 // Called when the player is given their weapons.
 forward void OnEquipPlayer(int client);
 
+forward void OnPlayerJump(int client);
+
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
 native bool IsWeaponSwitchAllowed(int client);
@@ -170,6 +172,9 @@ native int GetActiveWeapon(int client);
 // Checks if the player has the given weapon name in their inventory.
 // Returns the weapons entity index or -1 on failure / player not having the weapon.
 native int HasPlayerNamedItem(int client, const char[] szClassName);
+
+// bLobbySpawn is only ever set to true when joining the server.
+native void SpawnAsObserver(int client, bool bLobbySpawn = false);
 
 
 // Also works on players.
@@ -347,6 +352,7 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("IsFrenchNationalDay");
    MarkNativeAsOptional("IsAprilFools");
    MarkNativeAsOptional("GetAmmoWeight");
+   MarkNativeAsOptional("SpawnAsObserver");
 }
 #endif
 

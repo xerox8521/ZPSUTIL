@@ -84,4 +84,5 @@ void CreateNatives()
     CreateNative("GetMapType",                  Native_GetMapType);
     CreateNative("SetUberPushEnabled",          Native_SetUberPushEnabled);
     CreateNative("GetTeamSpeed",                Native_GetTeamSpeed);
+    CreateNative("SpawnAsObserver",             Native_SpawnAsObserver);
 }

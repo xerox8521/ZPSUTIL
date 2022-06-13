@@ -24,6 +24,13 @@ public void OnPluginStart()
     sv_zps_hardcore = FindConVar("sv_zps_hardcore");
 }
 
+public void OnPlayerJump(int client)
+{
+    static int jumps;
+    jumps++;
+    PrintToConsole(client, "Jumps: %d", jumps);
+}
+
 
 
 int GetBarricadeHealth(int client, int index)

@@ -21,4 +21,6 @@ void CreateGlobalForwards()
     gfIncrementArmorValue = CreateGlobalForward("OnIncrementArmorValue", ET_Event, Param_Cell, Param_Cell, Param_CellByRef);
 
     gfEquipPlayer = CreateGlobalForward("OnEquipPlayer", ET_Ignore, Param_Cell);
+
+    gfOnPlayerJump = CreateGlobalForward("OnPlayerJump", ET_Ignore, Param_Cell);
 }

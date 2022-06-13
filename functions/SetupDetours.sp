@@ -140,4 +140,12 @@ void SetupDetours()
         return;
     }
     ddOnEquipPlayer.Enable(Hook_Post, Hook_OnEquipPlayer);
+
+    ddOnDoAnimationEvent = DynamicDetour.FromConf(g_pGameConfig, "OnDoAnimationEvent");
+    if(ddOnDoAnimationEvent == null)
+    {
+        SetFailState("Failed to setup OnDoAnimationEvent detour. Update your Gamedata!");
+        return;
+    }
+    ddOnDoAnimationEvent.Enable(Hook_Post, Hook_OnDoAnimationEvent);
 }

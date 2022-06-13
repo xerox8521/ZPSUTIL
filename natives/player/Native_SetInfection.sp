@@ -1,5 +1,5 @@
 /*
-    You might be asking why this is an SDKCall when we litterally used a netprop in Native_IsInfected.
+    You might be asking why this is an SDKCall when we literally used a netprop in Native_IsInfected.
     Well short answer is ZP!S needs more than just the boolean to be set.
     So instead of having to update 3-4 Offsets everytime they break
     We just use a function offset which handles everything else for us.

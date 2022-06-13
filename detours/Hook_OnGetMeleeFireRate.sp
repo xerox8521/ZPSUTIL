@@ -3,7 +3,8 @@ public MRESReturn Hook_OnGetMeleeFireRate(int pThis, DHookReturn hReturn)
     int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwner");
     if(!IsValidEntity(owner))
         return MRES_Ignored;
-    if(GetEntProp(pThis, Prop_Send, "m_bBerzerking"))
+        
+    if(GetEntProp(owner, Prop_Send, "m_bBerzerking"))
     {
         hReturn.Value = 0.54;
     }

@@ -46,6 +46,7 @@
 #include "detours/Hook_OnZPDataInit.sp"
 #include "detours/Hook_OnEquipPlayer.sp"
 #include "detours/Hook_OnGetMeleeFireRate.sp"
+#include "detours/Hook_OnDoAnimationEvent.sp"
 
 #include "functions/AddBarricadeHealth.sp"
 #include "functions/CreateGlobalForwards.sp"
@@ -135,6 +136,7 @@
 #include "natives/player/Native_ToggleWeaponSwitch.sp"
 #include "natives/player/Native_SetMaxSpeed.sp"
 #include "natives/player/Native_GetTeamSpeed.sp"
+#include "natives/player/Native_SpawnAsObserver.sp"
 
 #include "natives/util/Native_IsChristmas.sp"
 #include "natives/util/Native_IsHalloween.sp"

@@ -1,6 +1,10 @@
 public Action OnClientSayCommand(int client, const char[] szCommand, const char[] szArgs)
 {
-    if(IsChatTrigger())
+    if(!client || IsChatTrigger())
+        return Plugin_Continue;
+
+    // Possible fix for duplicate admin messages
+    if(szArgs[0] == '@' && CheckCommandAccess(client, "sm_chat", ADMFLAG_CHAT))
         return Plugin_Continue;
 
     if(sm_zps_util_colored_tags.BoolValue == false)

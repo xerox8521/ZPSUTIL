@@ -1,6 +1,8 @@
-#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION "1.0.1"
 
 #define GRENADE_MODEL "models/weapons/w_grenade_thrown.mdl"
+
+#define ANIMATION_EVENT_JUMP 7
 
 enum 
 {

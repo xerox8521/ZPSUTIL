@@ -77,11 +77,6 @@
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player22SetInfectionResistanceEif"
             }
-            "CZP_Player::SetInfection"
-            {
-                "library"   "server"
-                "linux"     "@_ZN10CZP_Player22SetInfectionResistanceEif"
-            }
             "CZP_Player::VoiceMenu"
             {
                 "library"   "server"
@@ -281,7 +276,6 @@
             {
                 "library"   "server"
                 "linux"     "@_Z30CheckEmitReasonablePhysicsSpewv"
-                "windows"   "\xFF\x15\x2A\x2A\x2A\x2A\xDD\x05\x2A\x2A\x2A\x2A\xD9\xC9"
             }
             "CBasePlayer::IncrementArmorValue"
             {
@@ -348,9 +342,37 @@
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player12GetTeamSpeedEv"
             }
+            "CZP_Player::DoAnimationEvent"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player16DoAnimationEventE17PlayerAnimEvent_ti"
+            }
+            "CZP_Player::SpawnAsObserver"
+            {
+                "library"   "server"
+                "linux"     "@_ZN10CZP_Player15SpawnAsObserverEb"
+            }
         }
         "Functions"
         {
+            "OnDoAnimationEvent"
+            {
+                "signature" "CZP_Player::DoAnimationEvent"
+                "callconv"  "thiscall"
+                "return"    "void"
+                "this"      "entity"
+                "arguments"
+                {
+                    "animation"
+                    {
+                        "type"  "int"
+                    }
+                    "iUnknown"
+                    {
+                        "type"  "int"
+                    }
+                }
+            }
             "OnGetMeleeFireRate"
             {
                 "offset"    "CBaseWeapon_ZombieBase::GetFireRate"

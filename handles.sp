@@ -18,6 +18,7 @@ DynamicDetour ddVoiceMenu = null;
 DynamicDetour ddOnRoundEnd = null;
 DynamicDetour ddOnZPDataInitialize = null;
 DynamicDetour ddOnEquipPlayer = null;
+DynamicDetour ddOnDoAnimationEvent = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
@@ -34,6 +35,7 @@ GlobalForward gfCaptureStart = null;
 GlobalForward gfCaptured = null;
 GlobalForward gfIncrementArmorValue = null;
 GlobalForward gfEquipPlayer = null;
+GlobalForward gfOnPlayerJump = null;
 
 
 ConVar sm_zps_util_colored_tags = null;
