@@ -26,6 +26,13 @@ void SetupDetours()
         SetFailState("Failed to setup OnGetMeleeFireRate. Update your Gamedata!");
         return;
     }
+
+    dhGetMeleeRange = DynamicHook.FromConf(g_pGameConfig, "OnGetMeleeRange");
+    if(dhGetMeleeRange == null)
+    {
+        SetFailState("Failed to setup OnGetMeleeRange. Update your Gamedata!");
+        return;
+    }
     
     ddHandleJoinTeam = DynamicDetour.FromConf(g_pGameConfig, "OnPlayerJoinTeam");
     if(ddHandleJoinTeam == null)
@@ -148,4 +155,12 @@ void SetupDetours()
         return;
     }
     ddOnDoAnimationEvent.Enable(Hook_Post, Hook_OnDoAnimationEvent);
+
+    ddOnGetArmorAmmo = DynamicDetour.FromConf(g_pGameConfig, "OnGetArmorAmmo");
+    if(ddOnGetArmorAmmo == null)
+    {
+        SetFailState("Failed to setup OnGetArmorAmmo detour. Update your Gamedata!");
+        return;
+    }
+    ddOnGetArmorAmmo.Enable(Hook_Pre, Hook_OnGetArmorAmmo);
 }

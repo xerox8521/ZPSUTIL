@@ -61,6 +61,16 @@ enum
     MAPTYPE_FARMMAP,
 }
 
+//settings for m_takedamage
+enum 
+{
+    DAMAGE_NO = 0,
+    DAMAGE_EVENTS_ONLY = 1, // Call damage functions, but don't modify health
+    DAMAGE_YES,
+    DAMAGE_AIM
+}
+
+
 // Return Plugin_Changed if you have modifed team
 // Return Plugin_Handled to prevent the player from joining a team.
 forward Action OnPlayerJoinTeam(int client, int &team);
@@ -88,6 +98,10 @@ forward Action OnInoculatorExecuteAction(int inoculator, int owner, int target, 
 // This is NOT called by SetPlayerArmor!
 forward Action OnIncrementArmorValue(int client, int nCount, int &nMaxCount);
 
+forward Action OnGetMeleeRange(int weapon, int client, float &flRange);
+
+forward Action OnGetArmorAmmo(int client, int &MaxArmor);
+
 
 forward void OnRoundStart();
 // See the WINNER_ enumeration for possible values.
@@ -105,6 +119,9 @@ forward void OnCaptured(int trigger, int team);
 forward void OnEquipPlayer(int client);
 
 forward void OnPlayerJump(int client);
+
+
+native int GetBarricadeOwner(int barricade);
 
 native bool IsCarrier(int client);
 native bool IsInfected(int client);
@@ -140,6 +157,8 @@ native void AddPlayerWeight(int client, float weight);
 native void RemovePlayerWeight(int client, float weight);
 native void DropAllWeapons(int client);
 native void SetPlayerMaxSpeed(int client, float flMaxSpeed);
+native void ResetFragCount(int client);
+native void IncrementFragCount(int client, int count)
 
 // This properly initializes the correct values for barricade ammo.
 // THIS IS AN EXPERIMENTAL FUNCTION which means it CAN cause issues / crashes.
@@ -157,7 +176,7 @@ native void OpenSteamOverlay(int client, const char[] szURL);
 // Can be enabled in ZP!S Options -> Custom Content otherwise this does nothing
 native void PlayMusic(const char[] szTrack, const char[] szTitle);
 
-
+native void ResetScores(int client);
 native void ToggleWeaponSwitch(int client, bool bAllow);
 // Infection time defaults to 30-45 seconds unless specified.
 native void SetInfection(int client, bool bInfection, bool bForced, int infectionTime = -1);
@@ -171,7 +190,7 @@ native int GetActiveWeapon(int client);
 
 // Checks if the player has the given weapon name in their inventory.
 // Returns the weapons entity index or -1 on failure / player not having the weapon.
-native int HasPlayerNamedItem(int client, const char[] szClassName);
+native int HasNamedPlayerItem(int client, const char[] szClassName);
 
 // bLobbySpawn is only ever set to true when joining the server.
 native void SpawnAsObserver(int client, bool bLobbySpawn = false);
@@ -336,7 +355,7 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("IsMuted");
    MarkNativeAsOptional("RespawnPlayer");
    MarkNativeAsOptional("PlayMusic");
-   MarkNativeAsOptional("HasPlayerNamedItem");
+   MarkNativeAsOptional("HasNamedPlayerItem");
    MarkNativeAsOptional("CleanupMap");
    MarkNativeAsOptional("SetIntermission");
    MarkNativeAsOptional("GetRandomPlayer");
@@ -353,6 +372,8 @@ public void __pl_zpsutil_SetNTVOptional()
    MarkNativeAsOptional("IsAprilFools");
    MarkNativeAsOptional("GetAmmoWeight");
    MarkNativeAsOptional("SpawnAsObserver");
+   MarkNativeAsOptional("ResetScores");
+   MarkNativeAsOptional("GetBarricadeOwner");
 }
 #endif
 

@@ -23,4 +23,8 @@ void CreateGlobalForwards()
     gfEquipPlayer = CreateGlobalForward("OnEquipPlayer", ET_Ignore, Param_Cell);
 
     gfOnPlayerJump = CreateGlobalForward("OnPlayerJump", ET_Ignore, Param_Cell);
+
+    gfOnGetMeleeRange = CreateGlobalForward("OnGetMeleeRange", ET_Event, Param_Cell, Param_Cell, Param_FloatByRef);
+
+    gfOnGetArmorAmmo = CreateGlobalForward("OnGetArmorAmmo", ET_Event, Param_Cell, Param_CellByRef);
 }

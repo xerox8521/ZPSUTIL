@@ -9,6 +9,8 @@ float flMaxSpeed[MAXPLAYERS+1];
 
 int MapType = -1;
 
+int CArmorAmmoOffset;
+
 char szMapType[][] = 
 {
     "Invalid Map Type",

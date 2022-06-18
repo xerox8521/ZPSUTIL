@@ -47,6 +47,8 @@
 #include "detours/Hook_OnEquipPlayer.sp"
 #include "detours/Hook_OnGetMeleeFireRate.sp"
 #include "detours/Hook_OnDoAnimationEvent.sp"
+#include "detours/Hook_OnGetMeleeRange.sp"
+#include "detours/Hook_OnGetArmorAmmo.sp"
 
 #include "functions/AddBarricadeHealth.sp"
 #include "functions/CreateGlobalForwards.sp"
@@ -58,6 +60,7 @@
 #include "functions/StripColors.sp"
 #include "functions/GrabItemsGame_Float.sp"
 #include "functions/SetMapType.sp"
+#include "functions/IncrementArmorValue.sp"
 
 
 #include "hooks/OnCaptureEnd.sp"
@@ -68,6 +71,8 @@
 
 #include "natives/entities/Native_GetEntityMaxHealth.sp"
 #include "natives/entities/Native_SetEntityMaxHealth.sp"
+
+#include "natives/barricades/Native_GetBarricadeOwner.sp"
 
 #include "natives/gamerules/Native_AddRoundTime.sp"
 #include "natives/gamerules/Native_AddZombieLives.sp"
@@ -137,6 +142,9 @@
 #include "natives/player/Native_SetMaxSpeed.sp"
 #include "natives/player/Native_GetTeamSpeed.sp"
 #include "natives/player/Native_SpawnAsObserver.sp"
+#include "natives/player/Native_ResetScores.sp"
+#include "natives/player/Native_ResetFragCount.sp"
+#include "natives/player/Native_IncrementFragCount.sp"
 
 #include "natives/util/Native_IsChristmas.sp"
 #include "natives/util/Native_IsHalloween.sp"
@@ -198,6 +206,14 @@ public void OnPluginStart()
     SetupDetours();
 
     SetupEntityOutputs();
+
+    CArmorAmmoOffset = g_pGameConfig.GetOffset("CAmmo_Armor::AmmoOffset");
+
+    if(CArmorAmmoOffset == -1)
+    {
+        SetFailState("Failed to retrieve CArmorAmmoOffset");
+        return;
+    }
 
     sm_zps_util_colored_tags = CreateConVar("sm_zps_util_colored_tags", "0", "Enable or Disable colored messages from players in chat.\n1 = Colors allowed. 0 = No colors allowed", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     sm_zps_afk_admin_immunity = CreateConVar("sm_zps_afk_admin_immunity", "1", "Should SOURCEMOD Based admins be except from the Game AFK check.\n1 = Sourcemod Admins should be excempt. 0 = Sourcemod admins should still be checked", FCVAR_NOTIFY, true, 0.0, true, 1.0);

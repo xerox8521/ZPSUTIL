@@ -10,4 +10,19 @@ public void OnEntityCreated(int entity, const char[] szClassName)
     {
         dhGetMeleeFireRate.HookEntity(Hook_Post, entity, Hook_OnGetMeleeFireRate);
     }
+
+    if(StrContains(szClassName, "weapon_") != -1)
+    {
+        SDKHook(entity, SDKHook_SpawnPost, OnEntitySpawnPost);
+        
+    }
+}
+
+
+public void OnEntitySpawnPost(int entity)
+{
+    if(IsMeleeWeapon(entity))
+    {
+        dhGetMeleeRange.HookEntity(Hook_Post, entity, Hook_OnGetMeleeRange);
+    }
 }

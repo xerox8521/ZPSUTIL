@@ -1,16 +1,20 @@
 #include <sourcemod>
 #include <sdktools>
+#include <sdkhooks>
 #include <zpsutil>
+#include <dhooks>
 
 ConVar sv_zps_hardcore = null;
 
 GameData g_pGameConfig = null;
 
+DynamicHook dhOnBarricadeCollide;
+
 public void OnPluginStart()
 {
-    RegAdminCmd("sm_test", Command_Test, ADMFLAG_ROOT);
-    RegAdminCmd("sm_roar", Command_Roar, ADMFLAG_ROOT);
-    RegAdminCmd("sm_maxspeed", Command_Speed, ADMFLAG_ROOT);
+    //RegAdminCmd("sm_test", Command_Test, ADMFLAG_ROOT);
+    //RegAdminCmd("sm_roar", Command_Roar, ADMFLAG_ROOT);
+    //RegAdminCmd("sm_maxspeed", Command_Speed, ADMFLAG_ROOT);
 
     LoadTranslations("common.phrases");
 
@@ -21,16 +25,79 @@ public void OnPluginStart()
         return;
     }
 
-    sv_zps_hardcore = FindConVar("sv_zps_hardcore");
+    //sv_zps_hardcore = FindConVar("sv_zps_hardcore");
+
+    RegAdminCmd("sm_grenades", Command_Grenades, ADMFLAG_ROOT);
+
+    dhOnBarricadeCollide = DynamicHook.FromConf(g_pGameConfig, "OnShouldCollide");
 }
 
-public void OnPlayerJump(int client)
+enum
 {
-    static int jumps;
-    jumps++;
-    PrintToConsole(client, "Jumps: %d", jumps);
+	COLLISION_GROUP_NONE  = 0,
+	COLLISION_GROUP_DEBRIS,			// Collides with nothing but world and static stuff
+	COLLISION_GROUP_DEBRIS_TRIGGER, // Same as debris, but hits triggers
+	COLLISION_GROUP_INTERACTIVE_DEBRIS,	// Collides with everything except other interactive debris or debris
+	COLLISION_GROUP_INTERACTIVE,	// Collides with everything except interactive debris or debris
+	COLLISION_GROUP_PLAYER,
+	COLLISION_GROUP_BREAKABLE_GLASS,
+	COLLISION_GROUP_VEHICLE,
+	COLLISION_GROUP_PLAYER_MOVEMENT,  // For HL2, same as Collision_Group_Player, for
+										// TF2, this filters out other players and CBaseObjects
+	COLLISION_GROUP_NPC,			// Generic NPC group
+	COLLISION_GROUP_IN_VEHICLE,		// for any entity inside a vehicle
+	COLLISION_GROUP_WEAPON,			// for any weapons that need collision detection
+	COLLISION_GROUP_VEHICLE_CLIP,	// vehicle clip brush to restrict vehicle movement
+	COLLISION_GROUP_PROJECTILE,		// Projectiles!
+	COLLISION_GROUP_DOOR_BLOCKER,	// Blocks entities not permitted to get near moving doors
+	COLLISION_GROUP_PASSABLE_DOOR,	// Doors that the player shouldn't collide with
+	COLLISION_GROUP_DISSOLVING,		// Things that are dissolving are in this group
+	COLLISION_GROUP_PUSHAWAY,		// Nonsolid on client and server, pushaway in player code
+
+	COLLISION_GROUP_NPC_ACTOR,		// Used so NPCs in scripts ignore the player.
+	COLLISION_GROUP_NPC_SCRIPTED,	// USed for NPCs in scripts that should not collide with each other
+
+	LAST_SHARED_COLLISION_GROUP
 }
 
+public Action Command_Grenades(int client, int args)
+{
+    int ent = INVALID_ENT_REFERENCE;
+    while ((ent = FindEntityByClassname(ent, "weapon_frag")) != -1)
+		if (IsValidEntity(ent))
+            RemoveEntity(ent);
+    return Plugin_Handled;
+}
+
+public Action OnGetArmorAmmo(int client, int &MaxArmor)
+{
+    MaxArmor = 200;
+    return Plugin_Changed;
+}
+
+public MRESReturn OnShouldCollide(int pThis, DHookReturn hReturn, DHookParam hParams)
+{
+    int collisionGroup = hParams.Get(1);
+    int team = hParams.Get(3);
+    if(collisionGroup == COLLISION_GROUP_PLAYER_MOVEMENT)
+    {
+        if(team == TEAM_SURVIVOR)
+        {
+            hReturn.Value = false;
+            return MRES_Supercede;  
+        }
+    }
+    return MRES_Ignored;
+}
+
+
+public void OnEntityCreated(int entity, const char[] szClassName)
+{
+    if(StrEqual(szClassName, "prop_barricade"))
+    {
+        //dhOnBarricadeCollide.HookEntity(Hook_Post, entity, OnShouldCollide);
+    }
+}
 
 
 int GetBarricadeHealth(int client, int index)
@@ -81,7 +148,10 @@ void GiveBarricade(int client, int amount)
 
 public Action Command_Test(int client, int args)
 {
-    GiveBarricade(client, 5);
+    Handle warmup = StartMessageOne("Warmup", client, USERMSG_BLOCKHOOKS | USERMSG_RELIABLE);
+    BfWrite bf = UserMessageToBfWrite(warmup);
+    bf.WriteFloat(GetGameTime() + 999999.0);
+    EndMessage();
     return Plugin_Handled;
 }
 

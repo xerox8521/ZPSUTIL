@@ -4,6 +4,7 @@ DynamicHook dhHealthPrimary = null;
 DynamicHook dhHealthSecondary = null;
 DynamicHook dhHealthExecuteAction = null;
 DynamicHook dhGetMeleeFireRate = null;
+DynamicHook dhGetMeleeRange = null;
 
 DynamicDetour ddOnCheckAFK = null;
 DynamicDetour ddOnGetSpeed = null;
@@ -19,6 +20,7 @@ DynamicDetour ddOnRoundEnd = null;
 DynamicDetour ddOnZPDataInitialize = null;
 DynamicDetour ddOnEquipPlayer = null;
 DynamicDetour ddOnDoAnimationEvent = null;
+DynamicDetour ddOnGetArmorAmmo = null;
 
 GlobalForward gfHandleJoinTeam = null;
 GlobalForward gfVoiceMenu = null;
@@ -36,6 +38,8 @@ GlobalForward gfCaptured = null;
 GlobalForward gfIncrementArmorValue = null;
 GlobalForward gfEquipPlayer = null;
 GlobalForward gfOnPlayerJump = null;
+GlobalForward gfOnGetMeleeRange = null;
+GlobalForward gfOnGetArmorAmmo = null;
 
 
 ConVar sm_zps_util_colored_tags = null;

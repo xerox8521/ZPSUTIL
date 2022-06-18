@@ -64,9 +64,18 @@
             {
                 "linux"     "301"
             }
+            "CAmmo_Armor::AmmoOffset"
+            {
+                "linux"     "2004"
+            }
         }
         "Signatures"
         {
+            "CPropBarricade::GetBarricadeOwner"
+            {
+                "library"   "server"
+                "linux"     "@_ZN14CPropBarricade17GetBarricadeOwnerEv"
+            }
             "CZP_Player::SetInfection"
             {
                 "library"   "server"
@@ -352,9 +361,48 @@
                 "library"   "server"
                 "linux"     "@_ZN10CZP_Player15SpawnAsObserverEb"
             }
+            "CBasePlayer::ResetScores"
+            {
+                "library"   "server"
+                "linux"     "@_ZN11CBasePlayer11ResetScoresEv"
+            }
+            "CBasePlayer::IncrementFragCount"
+            {
+                "library"   "server"
+                "linux"     "@_ZN11CBasePlayer18IncrementFragCountEi"
+            }
+            "CBasePlayer::ResetFragCount"
+            {
+                "library"   "server"
+                "linux"     "@_ZN11CBasePlayer14ResetFragCountEv"
+            }
+            "CBasePlayer::HasNamedPlayerItem"
+            {
+                "library"   "server"
+                "linux"     "@_ZN11CBasePlayer18HasNamedPlayerItemEPKc"
+            }
+            "CAmmo_Armor::GetAmmo"
+            {
+                "library"   "server"
+                "linux"     "@_ZN11CAmmo_Armor7GetAmmoEP11CBasePlayer"
+            }
         }
         "Functions"
         {
+            "OnGetArmorAmmo"
+            {
+                "signature" "CAmmo_Armor::GetAmmo"
+                "callconv"  "thiscall"
+                "return"    "int"
+                "this"      "entity"
+                "arguments"
+                {
+                    "player"
+                    {
+                        "type"  "cbaseentity"
+                    }
+                }
+            }
             "OnDoAnimationEvent"
             {
                 "signature" "CZP_Player::DoAnimationEvent"
@@ -372,6 +420,13 @@
                         "type"  "int"
                     }
                 }
+            }
+            "OnGetMeleeRange"
+            {
+                "offset"    "CWeaponMeleeBase::GetRange"
+                "callconv"  "thiscall"
+                "return"    "float"
+                "this"      "entity"
             }
             "OnGetMeleeFireRate"
             {

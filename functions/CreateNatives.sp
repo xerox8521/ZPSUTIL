@@ -85,4 +85,8 @@ void CreateNatives()
     CreateNative("SetUberPushEnabled",          Native_SetUberPushEnabled);
     CreateNative("GetTeamSpeed",                Native_GetTeamSpeed);
     CreateNative("SpawnAsObserver",             Native_SpawnAsObserver);
+    CreateNative("ResetScores",                 Native_ResetScores);
+    CreateNative("IncrementFragCount",          Native_IncrementFragCount);
+    CreateNative("ResetFragCount",              Native_ResetFragCount);
+    CreateNative("GetBarricadeOwner",           Native_GetBarricadeOwner);
 }
